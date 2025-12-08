@@ -1,0 +1,10 @@
+
+
+# Trinity Method deployment files
+node_modules/
+.claude/
+trinity/
+trinity-hooks/
+viewer/
+CLAUDE.md
+TRINITY.md
