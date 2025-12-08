@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+</head>
+<body>
+  <!-- Login Form -->
+  <div id="loginContainer" class="auth-container">
+    <div class="auth-card">
+      <h1>Admin Login</h1>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+        </div>
+        <div id="loginMessage"></div>
+        <button type="submit">Log In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="dashboardContainer" style="display: none;">
+    <nav class="admin-nav">
+      <div class="admin-nav-content">
+        <h2>Admin Panel</h2>
+        <button id="logoutBtn" class="btn-secondary">Log Out</button>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="gallery">Photo Gallery</button>
+        <button class="tab-btn" data-tab="memories">Memories</button>
+      </div>
+
+      <!-- Gallery Management -->
+      <div id="galleryTab" class="tab-content active">
+        <div class="section-header">
+          <h2>Photo Gallery Management</h2>
+        </div>
+
+        <div class="upload-section card">
+          <h3>Upload New Photo</h3>
+          <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="photoFile">Select Photo</label>
+              <input type="file" id="photoFile" name="photo" accept="image/*" required>
+            </div>
+            <div class="form-group">
+              <label for="photoCaption">Caption</label>
+              <input type="text" id="photoCaption" name="caption" placeholder="Enter photo caption">
+            </div>
+            <div id="uploadMessage"></div>
+            <button type="submit">Upload Photo</button>
+          </form>
+        </div>
+
+        <div class="gallery-list" id="galleryList">
+          <div class="loading">Loading gallery...</div>
+        </div>
+      </div>
+
+      <!-- Memories Management -->
+      <div id="memoriesTab" class="tab-content">
+        <div class="section-header">
+          <h2>Memories Management</h2>
+          <p>Edit or delete messages from visitors</p>
+        </div>
+
+        <div class="memories-admin-list" id="memoriesAdminList">
+          <div class="loading">Loading memories...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Memory Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Edit Memory</h2>
+      <form id="editMemoryForm">
+        <input type="hidden" id="editMemoryIndex">
+        <div class="form-group">
+          <label for="editFrom">Name</label>
+          <input type="text" id="editFrom" required>
+        </div>
+        <div class="form-group">
+          <label for="editMessage">Message</label>
+          <textarea id="editMessage" rows="6" required></textarea>
+        </div>
+        <div id="editMessage"></div>
+        <button type="submit">Save Changes</button>
+        <button type="button" class="btn-secondary" id="cancelEdit">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Photo Modal -->
+  <div id="editPhotoModal" class="modal">
+    <div class="modal-content">
+      <span class="close-photo">&times;</span>
+      <h2>Edit Photo Caption</h2>
+      <form id="editPhotoForm">
+        <input type="hidden" id="editPhotoId">
+        <div class="form-group">
+          <label for="editPhotoCaption">Caption</label>
+          <input type="text" id="editPhotoCaption" required>
+        </div>
+        <div id="editPhotoMessage"></div>
+        <button type="submit">Save Changes</button>
+        <button type="button" class="btn-secondary" id="cancelPhotoEdit">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Image Crop Modal -->
+  <div id="cropModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <span class="close-crop">&times;</span>
+      <h2>Crop Image</h2>
+      <div class="crop-container">
+        <img id="cropImage" style="max-width: 100%;">
+      </div>
+      <div style="margin-top: 1rem;">
+        <button type="button" id="cropConfirm" class="btn">Crop & Upload</button>
+        <button type="button" class="btn-secondary" id="cancelCrop">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

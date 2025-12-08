@@ -1,10 +1,28 @@
+# Dependencies
+node_modules/
 
+# Environment variables
+.env
+.env.local
 
 # Trinity Method deployment files
-node_modules/
 .claude/
 trinity/
 trinity-hooks/
 viewer/
 CLAUDE.md
 TRINITY.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo

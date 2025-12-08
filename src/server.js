@@ -1,0 +1,69 @@
+const express = require('express');
+const cors = require('cors');
+const session = require('express-session');
+const path = require('path');
+const memoriesRouter = require('./routes/memories');
+const adminRouter = require('./routes/admin');
+const galleryRouter = require('./routes/gallery');
+const { SESSION_SECRET } = require('./config/admin');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Session middleware
+app.use(session({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'
+  }
+}));
+
+// API Routes
+app.use('/api/memories', memoriesRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/gallery', galleryRouter);
+
+// Serve HTML pages
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+app.get('/through-years', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/through-years.html'));
+});
+
+app.get('/memories', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/memories.html'));
+});
+
+app.get('/flowers', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/flowers.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin.html'));
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error'
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Memorial website running on http://localhost:${PORT}`);
+  console.log(`Press Ctrl+C to stop the server`);
+});

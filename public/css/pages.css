@@ -1,0 +1,182 @@
+/* Page-Specific Styles */
+
+/* Landing Page */
+.hero-image {
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.obituary {
+  line-height: 1.8;
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Through the Years - Photo Gallery */
+.gallery {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.gallery-item {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.gallery-caption {
+  padding: 1rem;
+  text-align: center;
+  font-style: italic;
+  color: var(--text-dark);
+}
+
+/* Lazy loading placeholder */
+.gallery-item img[data-src] {
+  background-color: var(--emerald-pale);
+  min-height: 300px;
+}
+
+/* Memories Page */
+.memory-form {
+  max-width: 600px;
+  margin: 0 auto 3rem;
+}
+
+.char-counter {
+  text-align: right;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  margin-top: 0.25rem;
+}
+
+.char-counter.warning {
+  color: #d97706;
+}
+
+.char-counter.error {
+  color: #dc2626;
+}
+
+.memories-list {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.memory-card {
+  background-color: var(--card-background);
+  border-left: 4px solid var(--primary-emerald);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.memory-from {
+  font-weight: 600;
+  color: var(--primary-emerald);
+  margin-bottom: 0.5rem;
+}
+
+.memory-message {
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.memory-date {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.75rem;
+  font-style: italic;
+}
+
+/* In Lieu of Flowers Page */
+.resources-section {
+  margin-bottom: 3rem;
+}
+
+.resource-card {
+  background-color: var(--card-background);
+  border: 2px solid var(--emerald-light);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.resource-card h3 {
+  color: var(--primary-emerald);
+  margin-bottom: 1rem;
+}
+
+.resource-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.resource-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.resource-list li:last-child {
+  border-bottom: none;
+}
+
+.resource-list a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--primary-emerald);
+  font-weight: 500;
+}
+
+.resource-list a:hover {
+  color: var(--emerald-dark);
+}
+
+.gofundme-section {
+  background: linear-gradient(135deg, var(--emerald-pale) 0%, var(--background) 100%);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.gofundme-section .btn {
+  font-size: 1.1rem;
+  padding: 1rem 2rem;
+  margin-top: 1rem;
+}
