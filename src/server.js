@@ -11,7 +11,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+// CORS configuration - allow credentials for same-origin requests
+app.use(cors({
+  origin: process.env.FRONTEND_URL || true,
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
@@ -23,7 +27,8 @@ app.use(session({
   cookie: {
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production'
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
