@@ -9,6 +9,14 @@ const charCount = document.getElementById('charCount');
 const formMessage = document.getElementById('formMessage');
 const memoriesList = document.getElementById('memoriesList');
 const submitBtn = document.getElementById('submitBtn');
+const photoInput = document.getElementById('photo');
+const cropModal = document.getElementById('cropModal');
+const closeCropModal = document.querySelector('.close-crop');
+
+// Cropper variables
+let cropper = null;
+let selectedFile = null;
+let croppedBlob = null;
 
 // Character counter
 messageInput.addEventListener('input', () => {
@@ -37,7 +45,7 @@ function showMessage(message, type) {
 
 /**
  * Submits a memory message to the backend
- * @param {Object} formData - { from: string, message: string }
+ * @param {FormData} formData - FormData with from, message, and optional photo
  * @returns {Promise<Response>}
  * @throws {ValidationError} If character limit exceeded or fields empty
  */
@@ -45,10 +53,7 @@ async function submitMemory(formData) {
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
+      body: formData
     });
 
     const data = await response.json();
@@ -106,10 +111,15 @@ function displayMemories(memories, container) {
       minute: '2-digit'
     });
 
+    const photoHtml = memory.photo
+      ? `<div class="memory-photo"><img src="/images/memory-photos/${memory.photo}" alt="Memory photo" loading="lazy"></div>`
+      : '';
+
     return `
       <div class="memory-card">
         <div class="memory-from">${escapeHtml(memory.from)}</div>
         <div class="memory-message">${escapeHtml(memory.message)}</div>
+        ${photoHtml}
         <div class="memory-date">${date}</div>
       </div>
     `;
@@ -129,14 +139,99 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// Photo file input change handler - show crop modal
+photoInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  selectedFile = file;
+  const reader = new FileReader();
+
+  reader.onload = (event) => {
+    const image = document.getElementById('cropImage');
+    image.src = event.target.result;
+    cropModal.classList.add('active');
+
+    if (cropper) {
+      cropper.destroy();
+    }
+
+    cropper = new Cropper(image, {
+      aspectRatio: NaN, // Free aspect ratio
+      viewMode: 1,
+      autoCropArea: 1,
+      responsive: true,
+      background: false
+    });
+  };
+
+  reader.readAsDataURL(file);
+});
+
+// Confirm crop
+document.getElementById('cropConfirm').addEventListener('click', () => {
+  if (!cropper) return;
+
+  const canvas = cropper.getCroppedCanvas();
+  canvas.toBlob((blob) => {
+    croppedBlob = blob;
+    cropModal.classList.remove('active');
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+    // Show user feedback that photo is ready
+    showMessage('Photo ready! Fill out your message and click Share Memory.', 'success');
+  }, 'image/jpeg', 0.9);
+});
+
+// Cancel crop
+document.getElementById('cancelCrop').addEventListener('click', () => {
+  cropModal.classList.remove('active');
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+  photoInput.value = '';
+  croppedBlob = null;
+});
+
+// Close crop modal
+closeCropModal.addEventListener('click', () => {
+  cropModal.classList.remove('active');
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+  photoInput.value = '';
+  croppedBlob = null;
+});
+
+// Close modal on outside click
+window.addEventListener('click', (e) => {
+  if (e.target === cropModal) {
+    cropModal.classList.remove('active');
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+    photoInput.value = '';
+    croppedBlob = null;
+  }
+});
+
 // Form submission handler
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const formData = {
-    from: fromInput.value.trim(),
-    message: messageInput.value.trim()
-  };
+  const formData = new FormData();
+  formData.append('from', fromInput.value.trim());
+  formData.append('message', messageInput.value.trim());
+
+  // Add cropped photo if available
+  if (croppedBlob) {
+    formData.append('photo', croppedBlob, selectedFile.name);
+  }
 
   // Disable submit button
   submitBtn.disabled = true;
@@ -151,6 +246,8 @@ form.addEventListener('submit', async (e) => {
     form.reset();
     charCount.textContent = '0';
     charCount.classList.remove('warning', 'error');
+    croppedBlob = null;
+    selectedFile = null;
 
     // Reload memories
     await loadMemories(memoriesList);

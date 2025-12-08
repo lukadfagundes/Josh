@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/responsive.css">
   <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 </head>
 <body>
   <nav>
@@ -50,6 +51,12 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label for="photo">Add a Photo (Optional)</label>
+          <input type="file" id="photo" name="photo" accept="image/*">
+          <small style="color: #6b7280; display: block; margin-top: 0.5rem;">Share a photo with your memory (max 10MB)</small>
+        </div>
+
         <div id="formMessage"></div>
 
         <button type="submit" id="submitBtn">Share Memory</button>
@@ -57,10 +64,26 @@
     </div>
   </div>
 
+  <!-- Photo Crop Modal -->
+  <div id="cropModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <span class="close-crop">&times;</span>
+      <h2>Crop Your Photo</h2>
+      <div class="crop-container">
+        <img id="cropImage" style="max-width: 100%;">
+      </div>
+      <div style="margin-top: 1rem; text-align: center;">
+        <button type="button" id="cropConfirm" class="btn">Use This Photo</button>
+        <button type="button" class="btn-secondary" id="cancelCrop">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <p>Forever in our hearts</p>
   </footer>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
   <script src="js/memories.js"></script>
 </body>
 </html>

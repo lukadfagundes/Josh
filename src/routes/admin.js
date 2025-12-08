@@ -248,6 +248,17 @@ router.delete('/memories/:index', requireAuth, async (req, res) => {
       });
     }
 
+    // Delete photo file if exists
+    const memory = memories[memoryIndex];
+    if (memory.photo) {
+      const photoPath = path.join(__dirname, '../../public/images/memory-photos/', memory.photo);
+      try {
+        await fs.unlink(photoPath);
+      } catch (err) {
+        console.warn('Could not delete memory photo file:', err);
+      }
+    }
+
     memories.splice(memoryIndex, 1);
 
     // Save updated memories
@@ -266,5 +277,7 @@ router.delete('/memories/:index', requireAuth, async (req, res) => {
     });
   }
 });
+
+// Note: Memory photo editing routes removed - visitors crop photos when submitting
 
 module.exports = router;

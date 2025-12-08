@@ -9,12 +9,13 @@ A beautiful memorial website built with love and care.
 - Four pages:
   - Landing page with photo and obituary
   - Through the Years photo gallery
-  - Interactive Memories guestbook
+  - Interactive Memories guestbook with optional photo uploads
   - Resources and support information
 - **Admin Panel** for managing content:
-  - Upload and manage photos
+  - Upload and manage gallery photos with cropping
   - Edit photo captions
-  - Moderate memories (edit/delete)
+  - Moderate memories (edit text, delete)
+  - View photos submitted with memories
   - Secure authentication
 
 ## Getting Started
@@ -73,8 +74,9 @@ Default credentials:
 - Upload photos to the gallery with image cropping (Cropper.js)
 - Edit photo captions
 - Delete photos
-- Edit visitor memories
-- Delete inappropriate memories
+- Edit visitor memory text (name and message)
+- View photos submitted with memories
+- Delete inappropriate memories (including photos)
 - Secure session-based authentication
 
 Full admin documentation: [docs/ADMIN.md](docs/ADMIN.md)
@@ -172,11 +174,16 @@ memorial-website/
 
 - Memories are stored in `data/memories.json`
 - Gallery metadata is stored in `data/gallery.json`
+- Gallery photos are stored in `public/images/gallery/`
+- Memory photos are stored in `public/images/memory-photos/`
 - The memory form has a 10,000 character limit
+- Photo uploads limited to 10MB
+- Visitors can optionally attach photos and crop them before submitting
+- Visitors crop their own photos - admins cannot edit memory photos
 - Rate limiting: 5 submissions per minute per IP
 - User input is validated and escaped on the frontend to prevent XSS
 - Admin panel uses session-based authentication with bcrypt password hashing
-- Gallery images support lazy loading for better performance
+- All images support lazy loading for better performance
 
 ## Making Changes
 

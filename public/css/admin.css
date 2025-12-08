@@ -253,7 +253,9 @@ input[type="file"]:hover {
 
 .close,
 .close-photo,
-.close-crop {
+.close-crop,
+.close-memory-photo,
+.close-crop-memory {
   position: absolute;
   right: 1rem;
   top: 1rem;
@@ -266,7 +268,9 @@ input[type="file"]:hover {
 
 .close:hover,
 .close-photo:hover,
-.close-crop:hover {
+.close-crop:hover,
+.close-memory-photo:hover,
+.close-crop-memory:hover {
   color: var(--primary-emerald);
 }
 

@@ -75,7 +75,7 @@ The admin link is not visible on any public pages - you must navigate to it dire
 
 **View All Memories:**
 - Click "Memories" tab
-- All submitted memories are listed with name, message, and timestamp
+- All submitted memories are listed with name, message, timestamp, and photo (if attached)
 
 **Edit Memory:**
 1. Find the memory you want to edit
@@ -83,10 +83,19 @@ The admin link is not visible on any public pages - you must navigate to it dire
 3. Modify the name or message
 4. Click "Save Changes"
 
+**View Memory Photos:**
+- Memories with photos will display the photo in the admin list
+- Photos are cropped by visitors when they submit their memory
+- You cannot edit or replace photos - visitors handle cropping before submission
+- To remove a photo, you must delete the entire memory
+
+**Note:** Memory photos are separate from the "Through the Years" gallery. Visitors crop these photos when submitting memories, ensuring the best presentation.
+
 **Delete Memory:**
 1. Find the memory you want to delete
 2. Click "Delete"
 3. Confirm deletion
+4. Both the memory text and any attached photo will be removed
 
 ## Security Notes
 
@@ -98,11 +107,15 @@ The admin link is not visible on any public pages - you must navigate to it dire
 
 ### File Upload Security
 
-- Only image files allowed (JPEG, PNG, GIF)
-- 10MB file size limit
+- Only image files allowed (JPEG, PNG, GIF, WebP)
+- 10MB file size limit for all uploads
 - Files are validated before upload
-- Images can be cropped before upload using Cropper.js
+- **Gallery photos:** Cropped by admin before upload using Cropper.js in admin panel
+- **Memory photos:** Cropped by visitors before submission using Cropper.js on public form
 - Uploaded files are stored with timestamp-based unique names
+- Gallery photos stored in: `public/images/gallery/`
+- Memory photos stored in: `public/images/memory-photos/`
+- Automatic cleanup of files on upload errors or deletions
 
 ### Rate Limiting
 
@@ -145,18 +158,22 @@ NODE_ENV=development (or production)
 
 **Photos not uploading:**
 - Check file size (must be under 10MB)
-- Verify file is an image (JPEG, PNG, GIF)
+- Verify file is an image (JPEG, PNG, GIF, WebP)
 - Ensure `public/images/gallery/` directory exists with write permissions
+- For memory photos, ensure `public/images/memory-photos/` directory exists
 
 **Photos not displaying on public page:**
-- Check that `data/gallery.json` is being updated
-- Verify photos exist in `public/images/gallery/`
+- Check that `data/gallery.json` is being updated (for gallery photos)
+- Check that `data/memories.json` includes photo filenames (for memory photos)
+- Verify photos exist in `public/images/gallery/` or `public/images/memory-photos/`
 - Check browser console for errors
-- Try clearing browser cache - gallery uses lazy loading
+- Try clearing browser cache - all images use lazy loading
 
 **Cropper not working:**
-- Ensure Cropper.js is loaded (check browser console)
-- CDN link in admin.html should load: https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js
+- **Admin panel:** Ensure Cropper.js is loaded (check browser console)
+  - CDN link in admin.html: https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js
+- **Memories page:** Ensure Cropper.js is loaded on public page
+  - CDN link in memories.html: https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js
 - Check that image file is a valid image format
 
 **Memories not updating:**
@@ -167,9 +184,10 @@ NODE_ENV=development (or production)
 ## Backup Recommendations
 
 Regularly backup these files:
-- `data/memories.json` - all visitor memories
-- `data/gallery.json` - photo metadata
-- `public/images/gallery/` - all uploaded photos
+- `data/memories.json` - all visitor memories with photo references
+- `data/gallery.json` - gallery photo metadata
+- `public/images/gallery/` - all gallery photos
+- `public/images/memory-photos/` - all photos attached to memories
 
 ## Support
 

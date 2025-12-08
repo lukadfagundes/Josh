@@ -116,11 +116,78 @@
   word-wrap: break-word;
 }
 
+.memory-photo {
+  margin: 1rem 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.memory-photo img {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 500px;
+  object-fit: contain;
+  background-color: #f3f4f6;
+}
+
 .memory-date {
   font-size: 0.85rem;
   color: #6b7280;
   margin-top: 0.75rem;
   font-style: italic;
+}
+
+/* Crop Modal for Memories */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.close-crop {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #6b7280;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-crop:hover {
+  color: var(--primary-emerald);
+}
+
+.crop-container {
+  max-height: 500px;
+  margin: 1rem 0;
+  background-color: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 /* In Lieu of Flowers Page */

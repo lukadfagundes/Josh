@@ -314,6 +314,12 @@ function displayMemories(memories) {
       minute: '2-digit'
     });
 
+    const photoHtml = memory.photo
+      ? `<div class="memory-admin-photo">
+           <img src="/images/memory-photos/${memory.photo}" alt="Memory photo" style="max-width: 200px; margin-top: 0.5rem; border-radius: 4px;">
+         </div>`
+      : '';
+
     return `
       <div class="memory-admin-card">
         <div class="memory-admin-header">
@@ -323,6 +329,7 @@ function displayMemories(memories) {
           </div>
         </div>
         <div class="memory-admin-message">${escapeHtml(memory.message)}</div>
+        ${photoHtml}
         <div class="memory-admin-actions">
           <button class="btn btn-small" onclick="editMemory(${index}, '${escapeHtml(memory.from).replace(/'/g, "\\'")}', '${escapeHtml(memory.message).replace(/'/g, "\\'")}')">Edit</button>
           <button class="btn btn-small btn-danger" onclick="deleteMemory(${index})">Delete</button>
@@ -487,3 +494,5 @@ window.addEventListener('click', (e) => {
     uploadForm.reset();
   }
 });
+
+// Note: Memory photo editing removed - visitors crop photos when submitting

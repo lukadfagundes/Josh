@@ -192,8 +192,10 @@ In Vercel dashboard:
 
 **To preserve data temporarily:**
 1. Download `data/memories.json` before redeploying
-2. Download photos from `public/images/gallery/`
-3. Reupload via admin panel after deployment
+2. Download `data/gallery.json` before redeploying
+3. Download photos from `public/images/gallery/`
+4. Download photos from `public/images/memory-photos/`
+5. Reupload via admin panel after deployment
 
 ---
 

@@ -37,7 +37,9 @@ Edit `public/flowers.html`:
 - Visit all 4 pages to ensure content looks good
 - Test on mobile (resize browser window)
 - Submit a test memory to verify the form works
-- Upload a test photo via admin panel
+- Submit a test memory with a photo - test the crop feature
+- Upload a test photo via admin panel (gallery) - test gallery crop feature
+- Verify you can view and delete memories with photos in admin panel
 
 ## 4. Before Deploying
 
@@ -81,7 +83,8 @@ Edit `public/css/global.css` - look for `:root` variables at the top
 **Moderate memories:**
 Use admin panel at http://localhost:3000/admin - "Memories" tab
 - Edit memory names and messages
-- Delete inappropriate memories
+- View photos attached to memories
+- Delete inappropriate memories (including photos)
 
 **Manage gallery:**
 Use admin panel - "Photo Gallery" tab
@@ -94,3 +97,4 @@ Save these files:
 - `data/memories.json`
 - `data/gallery.json`
 - `public/images/gallery/` folder
+- `public/images/memory-photos/` folder
