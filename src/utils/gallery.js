@@ -1,30 +1,23 @@
-const fs = require('fs').promises;
-const path = require('path');
-
-const GALLERY_FILE = path.join(__dirname, '../../data/gallery.json');
+const { sql } = require('../db');
 
 /**
- * Ensures the gallery file exists
- * @returns {Promise<void>}
- */
-async function ensureFileExists() {
-  try {
-    await fs.access(GALLERY_FILE);
-  } catch (error) {
-    await fs.writeFile(GALLERY_FILE, JSON.stringify({ photos: [] }, null, 2));
-  }
-}
-
-/**
- * Reads all gallery photos
+ * Reads all gallery photos from Postgres database
  * @returns {Promise<Array>}
  */
 async function readGallery() {
   try {
-    await ensureFileExists();
-    const data = await fs.readFile(GALLERY_FILE, 'utf8');
-    const { photos } = JSON.parse(data);
-    return photos.sort((a, b) => a.order - b.order);
+    const { rows } = await sql`
+      SELECT
+        id,
+        filename,
+        photo_url,
+        caption,
+        display_order as order
+      FROM gallery
+      ORDER BY display_order ASC
+    `;
+
+    return rows;
   } catch (error) {
     console.error('Error reading gallery:', error);
     throw new Error('Failed to read gallery');
@@ -32,40 +25,32 @@ async function readGallery() {
 }
 
 /**
- * Saves gallery data
- * @param {Array} photos - Array of photo objects
- * @returns {Promise<void>}
- */
-async function saveGallery(photos) {
-  try {
-    await fs.writeFile(GALLERY_FILE, JSON.stringify({ photos }, null, 2));
-  } catch (error) {
-    console.error('Error saving gallery:', error);
-    throw new Error('Failed to save gallery');
-  }
-}
-
-/**
  * Adds a new photo to gallery
- * @param {Object} photo - { filename, caption }
+ * @param {Object} photo - { filename, photoUrl, caption }
  * @returns {Promise<Object>}
  */
 async function addPhoto(photo) {
   try {
-    const photos = await readGallery();
-    const newId = Date.now().toString();
-    const maxOrder = photos.length > 0 ? Math.max(...photos.map(p => p.order)) : 0;
+    const { filename, photoUrl, caption } = photo;
 
-    const newPhoto = {
-      id: newId,
-      filename: photo.filename,
-      caption: photo.caption || '',
-      order: maxOrder + 1
-    };
+    // Get the max order value to add to the end
+    const { rows: orderRows } = await sql`
+      SELECT COALESCE(MAX(display_order), 0) as max_order FROM gallery
+    `;
+    const maxOrder = orderRows[0].max_order;
 
-    photos.push(newPhoto);
-    await saveGallery(photos);
-    return newPhoto;
+    const { rows } = await sql`
+      INSERT INTO gallery (filename, photo_url, caption, display_order)
+      VALUES (${filename}, ${photoUrl}, ${caption || ''}, ${maxOrder + 1})
+      RETURNING
+        id,
+        filename,
+        photo_url,
+        caption,
+        display_order as order
+    `;
+
+    return rows[0];
   } catch (error) {
     console.error('Error adding photo:', error);
     throw new Error('Failed to add photo');
@@ -74,26 +59,31 @@ async function addPhoto(photo) {
 
 /**
  * Updates a photo's caption
- * @param {string} id - Photo ID
+ * @param {number} id - Photo ID
  * @param {Object} updates - { caption }
  * @returns {Promise<Object>}
  */
 async function updatePhoto(id, updates) {
   try {
-    const photos = await readGallery();
-    const index = photos.findIndex(p => p.id === id);
+    const { caption } = updates;
 
-    if (index === -1) {
+    const { rows } = await sql`
+      UPDATE gallery
+      SET caption = ${caption}
+      WHERE id = ${id}
+      RETURNING
+        id,
+        filename,
+        photo_url,
+        caption,
+        display_order as order
+    `;
+
+    if (rows.length === 0) {
       throw new Error('Photo not found');
     }
 
-    photos[index] = {
-      ...photos[index],
-      ...updates
-    };
-
-    await saveGallery(photos);
-    return photos[index];
+    return rows[0];
   } catch (error) {
     console.error('Error updating photo:', error);
     throw error;
@@ -102,19 +92,27 @@ async function updatePhoto(id, updates) {
 
 /**
  * Deletes a photo from gallery
- * @param {string} id - Photo ID
- * @returns {Promise<void>}
+ * @param {number} id - Photo ID
+ * @returns {Promise<Object>} - Deleted photo data
  */
 async function deletePhoto(id) {
   try {
-    const photos = await readGallery();
-    const filtered = photos.filter(p => p.id !== id);
+    const { rows } = await sql`
+      DELETE FROM gallery
+      WHERE id = ${id}
+      RETURNING
+        id,
+        filename,
+        photo_url,
+        caption,
+        display_order as order
+    `;
 
-    if (filtered.length === photos.length) {
+    if (rows.length === 0) {
       throw new Error('Photo not found');
     }
 
-    await saveGallery(filtered);
+    return rows[0];
   } catch (error) {
     console.error('Error deleting photo:', error);
     throw error;

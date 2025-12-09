@@ -72,7 +72,7 @@ async function loadGalleryPhotos() {
 function displayGalleryPhotos(photos, container) {
   const html = photos.map(photo => `
     <div class="gallery-item">
-      <img data-src="images/gallery/${photo.filename}" alt="${photo.caption || 'Photo'}">
+      <img data-src="${photo.photo_url}" alt="${photo.caption || 'Photo'}">
       <div class="gallery-caption">
         ${photo.caption || ''}
       </div>

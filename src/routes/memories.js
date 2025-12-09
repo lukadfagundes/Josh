@@ -1,31 +1,15 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs').promises;
-const { validateMemory, sanitizeText } = require('../utils/validator');
+const { validateMemory } = require('../utils/validator');
 const { readMemories, saveMemory } = require('../utils/storage');
+const { uploadFile } = require('../utils/blob');
 
 const router = express.Router();
 
-// Configure multer for memory photo uploads
-const memoryStorage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../public/images/memory-photos');
-    try {
-      await fs.mkdir(uploadDir, { recursive: true });
-      cb(null, uploadDir);
-    } catch (err) {
-      cb(err);
-    }
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'memory-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
+// Configure multer for memory photo uploads (memory storage for Vercel Blob)
 const memoryUpload = multer({
-  storage: memoryStorage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
@@ -91,10 +75,6 @@ router.post('/', memoryUpload.single('photo'), async (req, res) => {
     // Rate limiting
     const clientIp = req.ip || req.connection.remoteAddress;
     if (!checkRateLimit(clientIp)) {
-      // Delete uploaded file if rate limited
-      if (req.file) {
-        await fs.unlink(req.file.path).catch(() => {});
-      }
       return res.status(429).json({
         success: false,
         message: 'Too many requests. Please wait a minute before submitting again.'
@@ -106,10 +86,6 @@ router.post('/', memoryUpload.single('photo'), async (req, res) => {
     // Validate input
     const validation = validateMemory({ from, message });
     if (!validation.valid) {
-      // Delete uploaded file if validation fails
-      if (req.file) {
-        await fs.unlink(req.file.path).catch(() => {});
-      }
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -117,33 +93,29 @@ router.post('/', memoryUpload.single('photo'), async (req, res) => {
       });
     }
 
-    // Create memory object (no sanitization - frontend handles escaping)
+    // Create memory object
     const memory = {
-      id: Date.now().toString(),
       from: from.trim(),
       message: message.trim(),
       timestamp: new Date().toISOString()
     };
 
-    // Add photo filename if uploaded
+    // Upload photo to Vercel Blob if provided
     if (req.file) {
-      memory.photo = req.file.filename;
+      const { url } = await uploadFile(req.file.buffer, req.file.originalname, 'memories');
+      memory.photo = url;
     }
 
-    // Save to storage
-    await saveMemory(memory);
+    // Save to database
+    const savedMemory = await saveMemory(memory);
 
     res.status(201).json({
       success: true,
       message: 'Memory shared successfully',
-      memory
+      memory: savedMemory
     });
   } catch (error) {
     console.error('Error creating memory:', error);
-    // Delete uploaded file on error
-    if (req.file) {
-      await fs.unlink(req.file.path).catch(() => {});
-    }
     res.status(500).json({
       success: false,
       message: 'Failed to save memory'

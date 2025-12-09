@@ -112,7 +112,7 @@ function displayMemories(memories, container) {
     });
 
     const photoHtml = memory.photo
-      ? `<div class="memory-photo"><img src="/images/memory-photos/${memory.photo}" alt="Memory photo" loading="lazy"></div>`
+      ? `<div class="memory-photo"><img src="${memory.photo}" alt="Memory photo" loading="lazy"></div>`
       : '';
 
     return `
