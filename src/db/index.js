@@ -10,7 +10,9 @@ const { Pool } = require('pg');
 // This uses the same POSTGRES_URL that @vercel/postgres uses
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 /**
