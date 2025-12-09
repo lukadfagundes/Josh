@@ -7,6 +7,7 @@ const { requireAuth } = require('../middleware/auth');
 const { readGallery, addPhoto, updatePhoto, deletePhoto } = require('../utils/gallery');
 const { readMemories, updateMemory, deleteMemory } = require('../utils/storage');
 const { uploadFile, deleteFile } = require('../utils/blob');
+const { adminLoginLimiter } = require('../config/rateLimits');
 
 const router = express.Router();
 
@@ -27,8 +28,8 @@ const upload = multer({
   }
 });
 
-// Login endpoint
-router.post('/login', async (req, res) => {
+// Login endpoint - rate limited to prevent brute force attacks
+router.post('/login', adminLoginLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -59,7 +60,7 @@ router.post('/login', async (req, res) => {
     req.session.username = username;
 
     // Explicitly save session before responding
-    req.session.save((err) => {
+    req.session.save(err => {
       if (err) {
         console.error('Session save error:', err);
         return res.status(500).json({

@@ -55,7 +55,7 @@ tabBtns.forEach(btn => {
 });
 
 // Login
-loginForm.addEventListener('submit', async (e) => {
+loginForm.addEventListener('submit', async e => {
   e.preventDefault();
 
   const username = document.getElementById('username').value;
@@ -98,7 +98,7 @@ logoutBtn.addEventListener('click', async () => {
 });
 
 // File input change handler - show crop modal
-document.getElementById('photoFile').addEventListener('change', (e) => {
+document.getElementById('photoFile').addEventListener('change', e => {
   const file = e.target.files[0];
 
   if (!file) return;
@@ -111,7 +111,7 @@ document.getElementById('photoFile').addEventListener('change', (e) => {
   selectedFile = file;
   const reader = new FileReader();
 
-  reader.onload = (event) => {
+  reader.onload = event => {
     const image = document.getElementById('cropImage');
     image.src = event.target.result;
 
@@ -139,45 +139,51 @@ document.getElementById('photoFile').addEventListener('change', (e) => {
 document.getElementById('cropConfirm').addEventListener('click', async () => {
   if (!cropper) return;
 
-  const caption = document.getElementById('photoCaption').value;
+  const caption = document.getElementById('cropCaption').value;
 
   // Get cropped canvas
   const canvas = cropper.getCroppedCanvas();
 
   // Convert to blob
-  canvas.toBlob(async (blob) => {
-    const formData = new FormData();
-    formData.append('photo', blob, selectedFile.name);
-    formData.append('caption', caption);
+  canvas.toBlob(
+    async blob => {
+      const formData = new FormData();
+      formData.append('photo', blob, selectedFile.name);
+      formData.append('caption', caption);
 
-    try {
-      const response = await fetch(`${API_BASE}/gallery`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
+      try {
+        const response = await fetch(`${API_BASE}/gallery`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data.success) {
-        showMessage(uploadMessage, 'Photo uploaded successfully!', 'success');
-        uploadForm.reset();
-        cropModal.classList.remove('active');
-        cropper.destroy();
-        cropper = null;
-        loadGallery();
-      } else {
-        showMessage(uploadMessage, data.message || 'Upload failed', 'error');
+        if (data.success) {
+          showMessage(uploadMessage, 'Photo uploaded successfully!', 'success');
+          uploadForm.reset();
+          document.getElementById('cropCaption').value = '';
+          cropModal.classList.remove('active');
+          cropper.destroy();
+          cropper = null;
+          loadGallery();
+        } else {
+          showMessage(uploadMessage, data.message || 'Upload failed', 'error');
+        }
+      } catch (error) {
+        showMessage(uploadMessage, 'Upload failed. Please try again.', 'error');
       }
-    } catch (error) {
-      showMessage(uploadMessage, 'Upload failed. Please try again.', 'error');
-    }
-  }, 'image/jpeg', 0.9);
+    },
+    'image/jpeg',
+    0.9
+  );
 });
 
 // Cancel crop
 document.getElementById('cancelCrop').addEventListener('click', () => {
   cropModal.classList.remove('active');
+  document.getElementById('cropCaption').value = '';
   if (cropper) {
     cropper.destroy();
     cropper = null;
@@ -186,7 +192,7 @@ document.getElementById('cancelCrop').addEventListener('click', () => {
 });
 
 // Upload photo (form submit now just validates)
-uploadForm.addEventListener('submit', (e) => {
+uploadForm.addEventListener('submit', e => {
   e.preventDefault();
   // Actual upload happens in crop confirmation
 });
@@ -216,7 +222,9 @@ function displayGallery(photos) {
     return;
   }
 
-  const html = photos.map(photo => `
+  const html = photos
+    .map(
+      photo => `
     <div class="gallery-admin-item">
       <img src="${photo.photo_url}" alt="${photo.caption}">
       <div class="gallery-admin-info">
@@ -227,7 +235,9 @@ function displayGallery(photos) {
         </div>
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   galleryList.innerHTML = html;
 }
@@ -240,7 +250,7 @@ function editPhoto(id, caption) {
 }
 
 // Edit photo form
-document.getElementById('editPhotoForm').addEventListener('submit', async (e) => {
+document.getElementById('editPhotoForm').addEventListener('submit', async e => {
   e.preventDefault();
 
   const id = document.getElementById('editPhotoId').value;
@@ -260,10 +270,18 @@ document.getElementById('editPhotoForm').addEventListener('submit', async (e) =>
       editPhotoModal.classList.remove('active');
       loadGallery();
     } else {
-      showMessage(document.getElementById('editPhotoMessage'), data.message || 'Update failed', 'error');
+      showMessage(
+        document.getElementById('editPhotoMessage'),
+        data.message || 'Update failed',
+        'error'
+      );
     }
   } catch (error) {
-    showMessage(document.getElementById('editPhotoMessage'), 'Update failed. Please try again.', 'error');
+    showMessage(
+      document.getElementById('editPhotoMessage'),
+      'Update failed. Please try again.',
+      'error'
+    );
   }
 });
 
@@ -316,22 +334,23 @@ function displayMemories(memories) {
     return;
   }
 
-  const html = memories.map((memory) => {
-    const date = new Date(memory.timestamp).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const html = memories
+    .map(memory => {
+      const date = new Date(memory.timestamp).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
 
-    const photoHtml = memory.photo
-      ? `<div class="memory-admin-photo">
+      const photoHtml = memory.photo
+        ? `<div class="memory-admin-photo">
            <img src="${memory.photo}" alt="Memory photo" style="max-width: 200px; margin-top: 0.5rem; border-radius: 4px;">
          </div>`
-      : '';
+        : '';
 
-    return `
+      return `
       <div class="memory-admin-card">
         <div class="memory-admin-header">
           <div>
@@ -347,7 +366,8 @@ function displayMemories(memories) {
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   memoriesAdminList.innerHTML = html;
 }
@@ -361,7 +381,7 @@ function editMemory(id, from, message) {
 }
 
 // Edit memory form
-document.getElementById('editMemoryForm').addEventListener('submit', async (e) => {
+document.getElementById('editMemoryForm').addEventListener('submit', async e => {
   e.preventDefault();
 
   const id = document.getElementById('editMemoryIndex').value;
@@ -385,7 +405,11 @@ document.getElementById('editMemoryForm').addEventListener('submit', async (e) =
       showMessage(document.getElementById('editMessage'), data.message || 'Update failed', 'error');
     }
   } catch (error) {
-    showMessage(document.getElementById('editMessage'), 'Update failed. Please try again.', 'error');
+    showMessage(
+      document.getElementById('editMessage'),
+      'Update failed. Please try again.',
+      'error'
+    );
   }
 });
 
@@ -488,6 +512,7 @@ closePhotoModal.addEventListener('click', () => {
 
 closeCropModal.addEventListener('click', () => {
   cropModal.classList.remove('active');
+  document.getElementById('cropCaption').value = '';
   if (cropper) {
     cropper.destroy();
     cropper = null;
@@ -504,7 +529,7 @@ document.getElementById('cancelPhotoEdit').addEventListener('click', () => {
 });
 
 // Close modal on outside click
-window.addEventListener('click', (e) => {
+window.addEventListener('click', e => {
   if (e.target === editModal) {
     editModal.classList.remove('active');
   }

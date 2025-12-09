@@ -4,6 +4,7 @@ const path = require('path');
 const { validateMemory } = require('../utils/validator');
 const { readMemories, saveMemory } = require('../utils/storage');
 const { uploadFile } = require('../utils/blob');
+const { memorySubmissionLimiter } = require('../config/rateLimits');
 
 const router = express.Router();
 
@@ -22,27 +23,6 @@ const memoryUpload = multer({
     cb(new Error('Only image files are allowed'));
   }
 });
-
-// Rate limiting - simple in-memory implementation
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const MAX_REQUESTS = 5;
-
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const requests = rateLimitMap.get(ip) || [];
-
-  // Filter out old requests
-  const recentRequests = requests.filter(time => now - time < RATE_LIMIT_WINDOW);
-
-  if (recentRequests.length >= MAX_REQUESTS) {
-    return false;
-  }
-
-  recentRequests.push(now);
-  rateLimitMap.set(ip, recentRequests);
-  return true;
-}
 
 /**
  * Handles GET request to retrieve all memories
@@ -70,17 +50,8 @@ router.get('/', async (req, res) => {
  * @returns {void}
  * @throws {ValidationError} If validation fails
  */
-router.post('/', memoryUpload.single('photo'), async (req, res) => {
+router.post('/', memorySubmissionLimiter, memoryUpload.single('photo'), async (req, res) => {
   try {
-    // Rate limiting
-    const clientIp = req.ip || req.connection.remoteAddress;
-    if (!checkRateLimit(clientIp)) {
-      return res.status(429).json({
-        success: false,
-        message: 'Too many requests. Please wait a minute before submitting again.'
-      });
-    }
-
     const { from, message } = req.body;
 
     // Validate input
