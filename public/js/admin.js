@@ -65,7 +65,8 @@ loginForm.addEventListener('submit', async (e) => {
     const response = await fetch(`${API_BASE}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password }),
+      credentials: 'include'
     });
 
     const data = await response.json();
@@ -86,7 +87,10 @@ loginForm.addEventListener('submit', async (e) => {
 // Logout
 logoutBtn.addEventListener('click', async () => {
   try {
-    await fetch(`${API_BASE}/logout`, { method: 'POST' });
+    await fetch(`${API_BASE}/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
     showLogin();
   } catch (error) {
     console.error('Logout error:', error);
@@ -149,7 +153,8 @@ document.getElementById('cropConfirm').addEventListener('click', async () => {
     try {
       const response = await fetch(`${API_BASE}/gallery`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include'
       });
 
       const data = await response.json();
@@ -189,7 +194,9 @@ uploadForm.addEventListener('submit', (e) => {
 // Load gallery
 async function loadGallery() {
   try {
-    const response = await fetch(`${API_BASE}/gallery`);
+    const response = await fetch(`${API_BASE}/gallery`, {
+      credentials: 'include'
+    });
     const data = await response.json();
 
     if (data.success) {
@@ -243,7 +250,8 @@ document.getElementById('editPhotoForm').addEventListener('submit', async (e) =>
     const response = await fetch(`${API_BASE}/gallery/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ caption })
+      body: JSON.stringify({ caption }),
+      credentials: 'include'
     });
 
     const data = await response.json();
@@ -267,7 +275,8 @@ async function deletePhoto(id) {
 
   try {
     const response = await fetch(`${API_BASE}/gallery/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      credentials: 'include'
     });
 
     const data = await response.json();
@@ -285,7 +294,9 @@ async function deletePhoto(id) {
 // Load memories
 async function loadMemories() {
   try {
-    const response = await fetch(`${API_BASE}/memories`);
+    const response = await fetch(`${API_BASE}/memories`, {
+      credentials: 'include'
+    });
     const data = await response.json();
 
     if (data.success) {
@@ -405,7 +416,9 @@ async function deleteMemory(id) {
 // Check auth status
 async function checkAuthStatus() {
   try {
-    const response = await fetch(`${API_BASE}/status`);
+    const response = await fetch(`${API_BASE}/status`, {
+      credentials: 'include'
+    });
     const data = await response.json();
 
     if (data.isAuthenticated) {
