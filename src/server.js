@@ -39,8 +39,10 @@ app.use(session({
 }));
 
 // API Routes
-app.use('/api/memories', memoriesRouter);
+// IMPORTANT: Register /api/admin BEFORE /api/memories to avoid route conflicts
+// Without this order, /api/admin/memories would match /api/memories first
 app.use('/api/admin', adminRouter);
+app.use('/api/memories', memoriesRouter);
 app.use('/api/gallery', galleryRouter);
 
 // Serve HTML pages
