@@ -438,11 +438,22 @@ function showLogin() {
 }
 
 // Show dashboard
-function showDashboard() {
+async function showDashboard() {
   loginContainer.style.display = 'none';
   dashboardContainer.style.display = 'block';
-  loadGallery();
-  loadMemories();
+
+  // Load sequentially to avoid race conditions
+  try {
+    await loadGallery();
+  } catch (error) {
+    console.error('Gallery load failed:', error);
+  }
+
+  try {
+    await loadMemories();
+  } catch (error) {
+    console.error('Memories load failed:', error);
+  }
 }
 
 // Show message

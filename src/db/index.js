@@ -1,9 +1,17 @@
 const { sql } = require('@vercel/postgres');
+const { Pool } = require('pg');
 
 /**
  * Database utility module for Vercel Postgres
  * Provides connection and query capabilities
  */
+
+// Create a connection pool for session store
+// This uses the same POSTGRES_URL that @vercel/postgres uses
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
 /**
  * Initialize database tables
@@ -52,5 +60,6 @@ async function initializeDatabase() {
 
 module.exports = {
   sql,
+  pool,
   initializeDatabase
 };

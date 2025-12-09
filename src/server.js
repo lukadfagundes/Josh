@@ -1,12 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const path = require('path');
 const memoriesRouter = require('./routes/memories');
 const adminRouter = require('./routes/admin');
 const galleryRouter = require('./routes/gallery');
 const { SESSION_SECRET } = require('./config/admin');
-const { initializeDatabase } = require('./db');
+const { initializeDatabase, pool } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,8 +24,13 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Session middleware
+// Session middleware with PostgreSQL store for serverless persistence
 app.use(session({
+  store: new pgSession({
+    pool: pool,
+    tableName: 'session',
+    createTableIfMissing: true
+  }),
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
