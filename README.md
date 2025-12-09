@@ -30,35 +30,42 @@ Dependencies are already installed. If you need to reinstall:
 npm install
 ```
 
-### First Time Setup
+### Local Development Setup
 
-1. Create `.env` file from template:
+This project uses **Vercel Postgres** (Neon) and **Vercel Blob** for persistent storage. To run locally:
+
+1. **Install Vercel CLI** (if not already installed):
    ```bash
-   cp .env.example .env
+   npm i -g vercel
    ```
 
-2. Edit `.env` and set your admin credentials:
-   - ADMIN_USERNAME (default: admin)
-   - ADMIN_PASSWORD (plaintext - will be hashed automatically)
-   - SESSION_SECRET (generate at randomkeygen.com)
+2. **Link to Vercel project** (one-time setup):
+   ```bash
+   vercel link
+   ```
 
-3. See [docs/SETUP.md](docs/SETUP.md) for complete setup instructions
+3. **Pull environment variables from Vercel**:
+   ```bash
+   vercel env pull .env.local
+   ```
 
-### Running the Website
+   This downloads ALL environment variables including:
+   - Your admin credentials (ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET)
+   - Postgres connection strings (POSTGRES_URL, etc.)
+   - Blob storage token (BLOB_READ_WRITE_TOKEN)
 
-Start the server:
+   **Important:** After pulling, change `NODE_ENV="production"` to `NODE_ENV="development"` in `.env.local` for local testing to work properly.
 
-```bash
-npm start
-```
-
-For development with auto-reload:
-
-```bash
-npm run dev
-```
+4. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
 
 The website will be available at: http://localhost:3000
+
+**Note:** The `vercel env pull` command will overwrite `.env.local` entirely, so all environment variables should be managed in the Vercel dashboard under Settings > Environment Variables.
+
+For complete setup instructions including production deployment, see [docs/VERCEL_POSTGRES_SETUP.md](docs/VERCEL_POSTGRES_SETUP.md)
 
 ## Admin Panel
 

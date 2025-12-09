@@ -6,6 +6,7 @@ const memoriesRouter = require('./routes/memories');
 const adminRouter = require('./routes/admin');
 const galleryRouter = require('./routes/gallery');
 const { SESSION_SECRET } = require('./config/admin');
+const { initializeDatabase } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -67,8 +68,22 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Memorial website running on http://localhost:${PORT}`);
-  console.log(`Press Ctrl+C to stop the server`);
-});
+// Initialize database and start server
+async function startServer() {
+  try {
+    // Initialize database tables
+    await initializeDatabase();
+    console.log('Database initialized');
+
+    // Start server
+    app.listen(PORT, () => {
+      console.log(`Memorial website running on http://localhost:${PORT}`);
+      console.log(`Press Ctrl+C to stop the server`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();

@@ -218,12 +218,12 @@ function displayGallery(photos) {
 
   const html = photos.map(photo => `
     <div class="gallery-admin-item">
-      <img src="images/gallery/${photo.filename}" alt="${photo.caption}">
+      <img src="${photo.photo_url}" alt="${photo.caption}">
       <div class="gallery-admin-info">
         <div class="gallery-admin-caption">${escapeHtml(photo.caption)}</div>
         <div class="gallery-admin-actions">
-          <button class="btn btn-small" onclick="editPhoto('${photo.id}', '${escapeHtml(photo.caption).replace(/'/g, "\\'")}')">Edit Caption</button>
-          <button class="btn btn-small btn-danger" onclick="deletePhoto('${photo.id}')">Delete</button>
+          <button class="btn btn-small" onclick="editPhoto(${photo.id}, '${escapeHtml(photo.caption).replace(/'/g, "\\'")}')">Edit Caption</button>
+          <button class="btn btn-small btn-danger" onclick="deletePhoto(${photo.id})">Delete</button>
         </div>
       </div>
     </div>
@@ -316,7 +316,7 @@ function displayMemories(memories) {
     return;
   }
 
-  const html = memories.map((memory, index) => {
+  const html = memories.map((memory) => {
     const date = new Date(memory.timestamp).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -327,7 +327,7 @@ function displayMemories(memories) {
 
     const photoHtml = memory.photo
       ? `<div class="memory-admin-photo">
-           <img src="/images/memory-photos/${memory.photo}" alt="Memory photo" style="max-width: 200px; margin-top: 0.5rem; border-radius: 4px;">
+           <img src="${memory.photo}" alt="Memory photo" style="max-width: 200px; margin-top: 0.5rem; border-radius: 4px;">
          </div>`
       : '';
 
@@ -342,8 +342,8 @@ function displayMemories(memories) {
         <div class="memory-admin-message">${escapeHtml(memory.message)}</div>
         ${photoHtml}
         <div class="memory-admin-actions">
-          <button class="btn btn-small" onclick="editMemory(${index}, '${escapeHtml(memory.from).replace(/'/g, "\\'")}', '${escapeHtml(memory.message).replace(/'/g, "\\'")}')">Edit</button>
-          <button class="btn btn-small btn-danger" onclick="deleteMemory(${index})">Delete</button>
+          <button class="btn btn-small" onclick="editMemory(${memory.id}, '${escapeHtml(memory.from).replace(/'/g, "\\'")}', '${escapeHtml(memory.message).replace(/'/g, "\\'")}')">Edit</button>
+          <button class="btn btn-small btn-danger" onclick="deleteMemory(${memory.id})">Delete</button>
         </div>
       </div>
     `;
@@ -353,8 +353,8 @@ function displayMemories(memories) {
 }
 
 // Edit memory
-function editMemory(index, from, message) {
-  document.getElementById('editMemoryIndex').value = index;
+function editMemory(id, from, message) {
+  document.getElementById('editMemoryIndex').value = id;
   document.getElementById('editFrom').value = unescapeHtml(from);
   document.getElementById('editMessage').value = unescapeHtml(message);
   editModal.classList.add('active');
@@ -364,12 +364,12 @@ function editMemory(index, from, message) {
 document.getElementById('editMemoryForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const index = document.getElementById('editMemoryIndex').value;
+  const id = document.getElementById('editMemoryIndex').value;
   const from = document.getElementById('editFrom').value;
   const message = document.getElementById('editMessage').value;
 
   try {
-    const response = await fetch(`${API_BASE}/memories/${index}`, {
+    const response = await fetch(`${API_BASE}/memories/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ from, message }),
@@ -390,13 +390,13 @@ document.getElementById('editMemoryForm').addEventListener('submit', async (e) =
 });
 
 // Delete memory
-async function deleteMemory(index) {
+async function deleteMemory(id) {
   if (!confirm('Are you sure you want to delete this memory?')) {
     return;
   }
 
   try {
-    const response = await fetch(`${API_BASE}/memories/${index}`, {
+    const response = await fetch(`${API_BASE}/memories/${id}`, {
       method: 'DELETE',
       credentials: 'include'
     });

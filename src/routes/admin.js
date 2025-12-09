@@ -2,27 +2,17 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs').promises;
 const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH } = require('../config/admin');
 const { requireAuth } = require('../middleware/auth');
 const { readGallery, addPhoto, updatePhoto, deletePhoto } = require('../utils/gallery');
-const { readMemories, saveMemory } = require('../utils/storage');
+const { readMemories, updateMemory, deleteMemory } = require('../utils/storage');
+const { uploadFile, deleteFile } = require('../utils/blob');
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/images/gallery/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
-  }
-});
-
+// Configure multer for file uploads (memory storage for Vercel Blob)
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
@@ -114,8 +104,14 @@ router.post('/gallery', requireAuth, upload.single('photo'), async (req, res) =>
     }
 
     const { caption } = req.body;
+
+    // Upload to Vercel Blob
+    const { url } = await uploadFile(req.file.buffer, req.file.originalname, 'gallery');
+
+    // Save to database
     const photo = await addPhoto({
-      filename: req.file.filename,
+      filename: req.file.originalname,
+      photoUrl: url,
       caption: caption || ''
     });
 
@@ -158,20 +154,13 @@ router.delete('/gallery/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Get photo info to delete file
-    const photos = await readGallery();
-    const photo = photos.find(p => p.id === id);
+    // Delete from database (returns photo data including URL)
+    const photo = await deletePhoto(parseInt(id));
 
-    if (photo) {
-      const filePath = path.join(__dirname, '../../public/images/gallery/', photo.filename);
-      try {
-        await fs.unlink(filePath);
-      } catch (err) {
-        console.warn('Could not delete file:', err);
-      }
+    // Delete from Vercel Blob
+    if (photo && photo.photo_url) {
+      await deleteFile(photo.photo_url);
     }
-
-    await deletePhoto(id);
 
     res.json({
       success: true,
@@ -196,74 +185,38 @@ router.get('/memories', requireAuth, async (req, res) => {
   }
 });
 
-router.put('/memories/:index', requireAuth, async (req, res) => {
+router.put('/memories/:id', requireAuth, async (req, res) => {
   try {
-    const { index } = req.params;
+    const { id } = req.params;
     const { from, message } = req.body;
 
-    const memories = await readMemories();
-    const memoryIndex = parseInt(index);
-
-    if (memoryIndex < 0 || memoryIndex >= memories.length) {
-      return res.status(404).json({
-        success: false,
-        message: 'Memory not found'
-      });
-    }
-
-    memories[memoryIndex] = {
-      ...memories[memoryIndex],
-      from: from || memories[memoryIndex].from,
-      message: message || memories[memoryIndex].message
-    };
-
-    // Save updated memories
-    const MEMORIES_FILE = path.join(__dirname, '../../data/memories.json');
-    await fs.writeFile(MEMORIES_FILE, JSON.stringify({ memories }, null, 2));
+    const memory = await updateMemory(parseInt(id), { from, message });
 
     res.json({
       success: true,
       message: 'Memory updated successfully',
-      memory: memories[memoryIndex]
+      memory
     });
   } catch (error) {
     console.error('Error updating memory:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update memory'
+      message: error.message || 'Failed to update memory'
     });
   }
 });
 
-router.delete('/memories/:index', requireAuth, async (req, res) => {
+router.delete('/memories/:id', requireAuth, async (req, res) => {
   try {
-    const { index } = req.params;
-    const memories = await readMemories();
-    const memoryIndex = parseInt(index);
+    const { id } = req.params;
 
-    if (memoryIndex < 0 || memoryIndex >= memories.length) {
-      return res.status(404).json({
-        success: false,
-        message: 'Memory not found'
-      });
+    // Delete from database (returns memory data including photo URL)
+    const memory = await deleteMemory(parseInt(id));
+
+    // Delete photo from Vercel Blob if exists
+    if (memory && memory.photo) {
+      await deleteFile(memory.photo);
     }
-
-    // Delete photo file if exists
-    const memory = memories[memoryIndex];
-    if (memory.photo) {
-      const photoPath = path.join(__dirname, '../../public/images/memory-photos/', memory.photo);
-      try {
-        await fs.unlink(photoPath);
-      } catch (err) {
-        console.warn('Could not delete memory photo file:', err);
-      }
-    }
-
-    memories.splice(memoryIndex, 1);
-
-    // Save updated memories
-    const MEMORIES_FILE = path.join(__dirname, '../../data/memories.json');
-    await fs.writeFile(MEMORIES_FILE, JSON.stringify({ memories }, null, 2));
 
     res.json({
       success: true,
@@ -273,7 +226,7 @@ router.delete('/memories/:index', requireAuth, async (req, res) => {
     console.error('Error deleting memory:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete memory'
+      message: error.message || 'Failed to delete memory'
     });
   }
 });
