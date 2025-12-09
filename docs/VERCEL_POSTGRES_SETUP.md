@@ -133,6 +133,27 @@ CREATE TABLE gallery (
 );
 ```
 
+### `session` table:
+```sql
+CREATE TABLE session (
+  sid VARCHAR NOT NULL PRIMARY KEY,
+  sess JSON NOT NULL,
+  expire TIMESTAMP(6) NOT NULL
+);
+CREATE INDEX IF NOT EXISTS IDX_session_expire ON session (expire);
+```
+
+**Purpose:** Stores admin session data for authentication persistence across serverless function instances.
+
+**Why needed:** Vercel serverless functions are stateless - each request may be handled by a different instance. Storing sessions in PostgreSQL ensures admin login persists across all instances.
+
+**Managed by:** `connect-pg-simple` package (PostgreSQL session store for express-session)
+
+**Configuration:**
+- Sessions expire after 24 hours
+- Table is automatically created on first server startup
+- Session data includes `isAdmin` flag and username
+
 ## Local Development
 
 ### Recommended: Use Vercel Postgres Locally
@@ -241,6 +262,22 @@ NODE_ENV=development
 1. Clear browser cookies
 2. Try logging in again
 3. Check that `SESSION_SECRET` environment variable is set
+
+### Admin session issues (401 errors)
+
+**Error:** "Unauthorized" errors in admin panel even after logging in
+
+**Solution:**
+1. Session store is properly configured with PostgreSQL
+2. Verify `POSTGRES_URL` environment variable is set
+3. Check that session table exists in database
+4. Clear browser cookies and log in again
+5. Check Vercel function logs for session-related errors
+
+**Technical Details:**
+- Sessions are stored in PostgreSQL using `connect-pg-simple`
+- This ensures sessions persist across serverless function instances
+- Without database session storage, each serverless instance has its own memory, causing session loss
 
 ## Data Migration (If You Have Existing Data)
 

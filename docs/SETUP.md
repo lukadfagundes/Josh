@@ -60,8 +60,8 @@ If you created the `.env` file correctly, you won't see this warning.
 3. Select a photo file
 4. Crop the image using the built-in cropper
 5. Add a caption
-6. Upload - photos automatically appear on "Through the Years" page
-7. Gallery loads dynamically from `data/gallery.json`
+6. Upload - photos automatically stored in Vercel Blob and appear on "Through the Years" page
+7. Gallery loads dynamically from PostgreSQL database
 
 ### Resources Page
 Edit `public/flowers.html`:
@@ -115,10 +115,11 @@ NODE_ENV=production
 
 **Photos not appearing:**
 - Check admin panel uploaded them successfully (look for success message)
-- Verify files exist in `public/images/gallery/`
-- Check `data/gallery.json` has the entries with correct structure
+- Verify photos were uploaded to Vercel Blob (check Vercel Storage dashboard)
+- Check database contains photo entries (check Vercel Storage → Postgres → Data)
 - Clear browser cache and reload (gallery uses lazy loading)
 - Check browser console for any JavaScript errors
+- Verify `BLOB_READ_WRITE_TOKEN` environment variable is set
 
 ## Need More Help?
 

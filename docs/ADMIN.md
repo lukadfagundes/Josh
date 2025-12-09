@@ -112,10 +112,10 @@ The admin link is not visible on any public pages - you must navigate to it dire
 - Files are validated before upload
 - **Gallery photos:** Cropped by admin before upload using Cropper.js in admin panel
 - **Memory photos:** Cropped by visitors before submission using Cropper.js on public form
-- Uploaded files are stored with timestamp-based unique names
-- Gallery photos stored in: `public/images/gallery/`
-- Memory photos stored in: `public/images/memory-photos/`
-- Automatic cleanup of files on upload errors or deletions
+- Uploaded files stored in **Vercel Blob** with unique identifiers
+- Automatic cleanup on upload errors or deletions
+- All photos accessible via secure Blob URLs
+- Photos persist across deployments and serverless scaling
 
 ### Rate Limiting
 
@@ -152,22 +152,30 @@ NODE_ENV=development (or production)
 ## Troubleshooting
 
 **Can't log in:**
-- Check username and password in [src/config/admin.js](src/config/admin.js)
+- Check that environment variables are set in Vercel dashboard
 - Clear browser cookies and try again
-- Check server logs for errors
+- Check Vercel function logs for errors
+- Verify `SESSION_SECRET` is configured
+
+**Session expires immediately / 401 errors:**
+- Session data is stored in PostgreSQL for serverless persistence
+- Check that `POSTGRES_URL` environment variable is set
+- Verify database connection is working
+- Clear browser cookies and try logging in again
 
 **Photos not uploading:**
 - Check file size (must be under 10MB)
 - Verify file is an image (JPEG, PNG, GIF, WebP)
-- Ensure `public/images/gallery/` directory exists with write permissions
-- For memory photos, ensure `public/images/memory-photos/` directory exists
+- Ensure `BLOB_READ_WRITE_TOKEN` environment variable is set
+- Check Vercel Blob storage quota (free tier: 500 GB/month bandwidth)
+- Check Vercel function logs for specific errors
 
 **Photos not displaying on public page:**
-- Check that `data/gallery.json` is being updated (for gallery photos)
-- Check that `data/memories.json` includes photo filenames (for memory photos)
-- Verify photos exist in `public/images/gallery/` or `public/images/memory-photos/`
+- Verify photos were successfully uploaded to Vercel Blob
+- Check that database contains photo URLs
 - Check browser console for errors
-- Try clearing browser cache - all images use lazy loading
+- Try clearing browser cache
+- Verify Blob URLs are accessible
 
 **Cropper not working:**
 - **Admin panel:** Ensure Cropper.js is loaded (check browser console)
@@ -177,17 +185,28 @@ NODE_ENV=development (or production)
 - Check that image file is a valid image format
 
 **Memories not updating:**
-- Ensure `data/memories.json` has write permissions
-- Check server logs for errors
-- Try restarting the server
+- Check Vercel function logs for database errors
+- Verify `POSTGRES_URL` environment variable is set
+- Check PostgreSQL connection in Vercel Storage dashboard
+- Test database connectivity
 
 ## Backup Recommendations
 
-Regularly backup these files:
-- `data/memories.json` - all visitor memories with photo references
-- `data/gallery.json` - gallery photo metadata
-- `public/images/gallery/` - all gallery photos
-- `public/images/memory-photos/` - all photos attached to memories
+**Database Backup:**
+- Vercel Postgres (Neon) automatically backs up your database
+- You can export data from Vercel Storage dashboard
+- Navigate to Storage → Your Postgres database → Data tab
+- Use SQL queries to export specific tables if needed
+
+**Blob Storage:**
+- Photos are stored in Vercel Blob with high redundancy
+- You can browse and download photos from Vercel Storage dashboard
+- Navigate to Storage → Your Blob store → Browse files
+
+**Manual Backup (Optional):**
+- Export database tables as SQL or CSV
+- Download photos from Blob storage dashboard
+- Store backups locally or in cloud storage (Google Drive, Dropbox, etc.)
 
 ## Support
 

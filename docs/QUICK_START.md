@@ -93,8 +93,8 @@ Use admin panel - "Photo Gallery" tab
 - Delete photos
 
 **Backup your data:**
-Save these files:
-- `data/memories.json`
-- `data/gallery.json`
-- `public/images/gallery/` folder
-- `public/images/memory-photos/` folder
+- Data is automatically backed up in Vercel Postgres (Neon)
+- Photos are stored in Vercel Blob with high redundancy
+- Export data from Vercel Storage dashboard if needed:
+  - Navigate to Storage → Postgres database → Data tab
+  - Navigate to Storage → Blob store → Browse files

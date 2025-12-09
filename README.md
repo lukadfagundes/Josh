@@ -30,6 +30,8 @@ Dependencies are already installed. If you need to reinstall:
 npm install
 ```
 
+**Note:** After installing dependencies, pre-commit hooks will be automatically configured via Husky.
+
 ### Local Development Setup
 
 This project uses **Vercel Postgres** (Neon) and **Vercel Blob** for persistent storage. To run locally:
@@ -136,29 +138,35 @@ The admin panel includes a built-in image cropper (Cropper.js) that allows you t
 
 ## Deploying the Website
 
-### Free Hosting Options
+This application is designed for **Vercel** deployment with Postgres and Blob storage.
 
-**Render.com** (Recommended - Free tier available):
-1. Push this code to GitHub
-2. Sign up at render.com
-3. Create a new "Web Service"
-4. Connect your GitHub repo
-5. Set build command: `npm install`
-6. Set start command: `npm start`
-7. Add environment variables in Render dashboard:
-   - ADMIN_USERNAME
-   - ADMIN_PASSWORD
-   - SESSION_SECRET
-   - NODE_ENV=production
+**Prerequisites:**
+1. Vercel account (free tier available)
+2. GitHub repository
 
-**Railway.app**:
-1. Push to GitHub
-2. Sign up at railway.app
-3. "New Project" → "Deploy from GitHub"
-4. Select your repo
+**Setup Steps:**
+1. Push code to GitHub
+2. Import project to Vercel
+3. Set up Vercel Postgres (Neon) database
+4. Set up Vercel Blob storage
+5. Configure environment variables
 
-**Heroku** (Free tier discontinued but still an option):
-- Follow Heroku's Node.js deployment guide
+**Complete deployment guide:** See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) and [docs/VERCEL_POSTGRES_SETUP.md](docs/VERCEL_POSTGRES_SETUP.md)
+
+**Why Vercel?**
+- Free tier includes Postgres database and Blob storage
+- Automatic HTTPS and global CDN
+- Serverless functions handle all API routes
+- Data persists across deployments
+- Zero configuration for production
+
+**Environment Variables Required:**
+- `ADMIN_USERNAME` - Your admin username
+- `ADMIN_PASSWORD` - Your admin password
+- `SESSION_SECRET` - Random secret for sessions
+- `NODE_ENV` - Set to `production`
+- `POSTGRES_URL` - Auto-configured by Vercel
+- `BLOB_READ_WRITE_TOKEN` - Auto-configured by Vercel
 
 ## Project Structure
 
@@ -167,23 +175,25 @@ memorial-website/
 ├── public/                 # Frontend files
 │   ├── css/               # Stylesheets
 │   ├── js/                # JavaScript
-│   ├── images/            # Photos
+│   ├── images/            # Static photos
 │   └── *.html             # Pages
 ├── src/                   # Backend
 │   ├── routes/            # API routes
-│   ├── utils/             # Utilities
+│   ├── utils/             # Utilities (storage, blob, validation)
+│   ├── db/                # Database connection and initialization
+│   ├── middleware/        # Authentication middleware
+│   ├── config/            # Configuration
 │   └── server.js          # Express server
-├── data/                  # Memory storage
+├── docs/                  # Documentation
 └── package.json
 ```
 
 ## Notes
 
-- Memories are stored in `data/memories.json`
-- Gallery metadata is stored in `data/gallery.json`
-- Gallery photos are stored in `public/images/gallery/`
-- Memory photos are stored in `public/images/memory-photos/`
-- The memory form has a 10,000 character limit
+- **Data Storage**: Memories and gallery metadata stored in Vercel Postgres (Neon)
+- **Photo Storage**: All photos stored in Vercel Blob storage
+- **Session Storage**: Admin sessions stored in PostgreSQL for serverless persistence
+- Memory form has a 10,000 character limit
 - Photo uploads limited to 10MB
 - Visitors can optionally attach photos and crop them before submitting
 - Visitors crop their own photos - admins cannot edit memory photos
@@ -191,6 +201,35 @@ memorial-website/
 - User input is validated and escaped on the frontend to prevent XSS
 - Admin panel uses session-based authentication with bcrypt password hashing
 - All images support lazy loading for better performance
+- **Data persists** across deployments and serverless function instances
+
+## Code Quality & Pre-Commit Hooks
+
+This project uses **pre-commit hooks** to ensure code quality before commits:
+
+- **Prettier**: Automatically formats code for consistent styling
+- **ESLint**: Catches JavaScript errors and enforces best practices
+- **Husky**: Manages git hooks
+- **lint-staged**: Runs checks only on staged files
+
+### How It Works
+
+When you run `git commit`, the pre-commit hook will automatically:
+1. Run ESLint on staged JavaScript files and auto-fix issues
+2. Run Prettier on staged files (JS, JSON, CSS, HTML) and format them
+3. Stage the formatted/fixed files
+4. Proceed with commit if all checks pass
+
+### Available Scripts
+
+```bash
+npm run format         # Format all files
+npm run format:check   # Check formatting without changes
+npm run lint           # Run linter
+npm run lint:fix       # Run linter and auto-fix issues
+```
+
+**For complete pre-commit documentation:** See [PRE_COMMIT_SETUP.md](PRE_COMMIT_SETUP.md)
 
 ## Making Changes
 
@@ -198,6 +237,8 @@ Feel free to customize:
 - Colors in `public/css/global.css` (search for `:root` variables)
 - Layout and spacing throughout the CSS files
 - Add more pages or sections as needed
+
+**Note:** Your changes will be automatically formatted when you commit thanks to pre-commit hooks!
 
 ## Support
 

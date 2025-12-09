@@ -174,28 +174,40 @@ In Vercel dashboard:
 
 ---
 
-## Data Persistence on Vercel
+## Data Persistence
 
-**IMPORTANT:** Vercel has **ephemeral filesystem** - uploaded files and JSON data may be lost on redeployment.
+**✅ FULLY PERSISTENT STORAGE**
 
-### For Production Use, Consider:
+This application uses **Vercel Postgres** and **Vercel Blob** for complete data persistence:
 
-**Option 1: External Storage (Recommended)**
-- Use a database like MongoDB Atlas (free tier), Supabase, or PlanetScale
-- Store memories and gallery metadata in database
-- Store images on Cloudinary or Vercel Blob
+**Database (Vercel Postgres - Neon):**
+- Stores all memories (name, message, photo URLs, timestamps)
+- Stores gallery metadata (filename, photo URL, caption, display order)
+- Stores admin sessions for authentication across serverless instances
+- **Data survives:** Redeployments, serverless scaling, instance restarts
 
-**Option 2: Current Setup (Development/Testing)**
-- Works fine for testing and development
-- Photos and memories persist between visits
-- May be lost when Vercel redeploys or scales
+**Photo Storage (Vercel Blob):**
+- Stores all gallery photos
+- Stores all memory photos
+- Photos accessible via secure HTTPS URLs
+- **Photos survive:** Redeployments, function scaling, all scenarios
 
-**To preserve data temporarily:**
-1. Download `data/memories.json` before redeploying
-2. Download `data/gallery.json` before redeploying
-3. Download photos from `public/images/gallery/`
-4. Download photos from `public/images/memory-photos/`
-5. Reupload via admin panel after deployment
+**Session Storage (PostgreSQL):**
+- Admin sessions stored in database, not memory
+- Ensures login persists across different serverless function instances
+- Fixes 401 authentication errors common in serverless environments
+
+**No data loss on:**
+- Git push / redeployment
+- Vercel function scaling
+- Serverless instance changes
+- Project updates
+- Environment variable changes
+
+**Free Tier Limits:**
+- Postgres: 256 MB storage, 60 hours compute/month
+- Blob: 500 GB bandwidth/month
+- Should be more than sufficient for a memorial website
 
 ---
 
@@ -225,13 +237,19 @@ In Vercel dashboard:
 4. Redeploy after adding environment variables
 5. Check function logs for "WARNING: Using default admin credentials"
 
-### Memories Not Saving
+### Memories/Photos Not Saving
 
-**Cause:** Vercel's ephemeral filesystem
+**Cause:** Database or Blob storage connection issue
 
 **Solutions:**
-- For development: This is expected, just testing
-- For production: Migrate to database (see Data Persistence section above)
+1. Verify Vercel Postgres is connected (Storage tab in Vercel dashboard)
+2. Verify Vercel Blob is connected (Storage tab in Vercel dashboard)
+3. Check environment variables:
+   - `POSTGRES_URL` should be auto-configured
+   - `BLOB_READ_WRITE_TOKEN` should be auto-configured
+4. Check Vercel function logs for specific errors
+5. Test database connection in Storage dashboard
+6. Verify free tier limits haven't been exceeded
 
 ### Images Not Loading
 
@@ -248,6 +266,29 @@ git commit -m "Add images"
 git push
 ```
 
+### Admin 401 Errors / Can't Stay Logged In
+
+**Symptoms:**
+- Log in successfully but get 401 errors on admin operations
+- Session expires immediately
+- Works on one tab but fails on another
+
+**Cause:** Session persistence issue (now fixed with PostgreSQL session store)
+
+**Solutions:**
+1. Verify `POSTGRES_URL` environment variable exists
+2. Check that database connection is working
+3. Verify session table exists (automatically created)
+4. Clear all browser cookies for the site
+5. Log in again
+6. Check Vercel function logs for session/database errors
+
+**Technical Fix Applied:**
+- Sessions now stored in PostgreSQL instead of memory
+- Uses `connect-pg-simple` package
+- Ensures sessions persist across serverless function instances
+- This fix resolves the "works for gallery but not memories" issue
+
 ### Function Timeout Errors
 
 **Cause:** Vercel has 10-second function timeout on free tier
@@ -259,25 +300,20 @@ git push
 
 ---
 
-## Alternative Deployment Options
+## Why Vercel?
 
-### Render.com (For Persistent Storage)
+This application is **specifically designed for Vercel** with:
+- Vercel Postgres (Neon) for database
+- Vercel Blob for photo storage
+- PostgreSQL session store for serverless authentication
 
-If you need persistent filesystem (photos/memories survive redeployments):
+**Alternative platforms would require:**
+- Setting up your own PostgreSQL database
+- Setting up your own object storage (S3, Cloudinary, etc.)
+- Modifying code to use different storage providers
+- Additional configuration and cost
 
-1. Go to [render.com](https://render.com)
-2. Create "Web Service" from GitHub repo
-3. Add same environment variables
-4. Free tier includes persistent disk
-
-**Trade-off:** Slower than Vercel, may sleep after inactivity
-
-### Railway.app
-
-1. Go to [railway.app](https://railway.app)
-2. "New Project" → Deploy from GitHub
-3. Add environment variables in Variables tab
-4. Auto-deploys on Git push
+**Recommendation:** Use Vercel for this project. It's free, fast, and designed to work out-of-the-box with this codebase.
 
 ---
 
