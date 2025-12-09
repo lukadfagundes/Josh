@@ -13,8 +13,11 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 // CORS configuration - allow credentials for same-origin requests
+// In production with sameSite:'none', we must specify the exact origin
 app.use(cors({
-  origin: process.env.FRONTEND_URL || true,
+  origin: process.env.NODE_ENV === 'production'
+    ? 'https://josh.sunny-stack.com'
+    : true,
   credentials: true
 }));
 app.use(express.json());
