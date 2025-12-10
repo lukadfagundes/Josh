@@ -1,30 +1,71 @@
 /* Responsive Design - Mobile First */
 
 /* Mobile (default - up to 767px) */
+nav {
+  padding: 0.75rem 0.5rem;
+}
+
 nav ul {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  gap: 0.5rem;
+}
+
+nav a {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 h1 {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
 .container {
+  padding: 0.75rem;
+}
+
+.card {
   padding: 1rem;
+}
+
+.hero-image {
+  max-width: 100%;
+  margin-bottom: 1.25rem;
+}
+
+.obituary {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.obituary p {
+  margin-bottom: 1rem;
 }
 
 /* Tablet (768px and up) */
 @media (min-width: 768px) {
+  nav {
+    padding: 1rem;
+  }
+
   nav ul {
+    font-size: 1rem;
+    gap: 1rem;
+  }
+
+  nav a {
+    padding: 0.5rem 1rem;
     font-size: 1rem;
   }
 
   h1 {
     font-size: 2.5rem;
+    margin-bottom: 1rem;
   }
 
   h2 {
@@ -33,6 +74,20 @@ h2 {
 
   .container {
     padding: 2rem 1.5rem;
+  }
+
+  .card {
+    padding: 2rem;
+  }
+
+  .hero-image {
+    max-width: 500px;
+    margin-bottom: 2rem;
+  }
+
+  .obituary {
+    font-size: 1.1rem;
+    line-height: 1.8;
   }
 }
 

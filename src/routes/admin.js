@@ -4,7 +4,13 @@ const multer = require('multer');
 const path = require('path');
 const { ADMIN_USERNAME, ADMIN_PASSWORD_HASH } = require('../config/admin');
 const { requireAuth } = require('../middleware/auth');
-const { readGallery, addPhoto, updatePhoto, deletePhoto } = require('../utils/gallery');
+const {
+  readGallery,
+  addPhoto,
+  updatePhoto,
+  deletePhoto,
+  updatePhotoOrder
+} = require('../utils/gallery');
 const { readMemories, updateMemory, deleteMemory } = require('../utils/storage');
 const { uploadFile, deleteFile } = require('../utils/blob');
 const { adminLoginLimiter } = require('../config/rateLimits');
@@ -183,6 +189,32 @@ router.delete('/gallery/:id', requireAuth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to delete photo'
+    });
+  }
+});
+
+router.patch('/gallery/reorder', requireAuth, async (req, res) => {
+  try {
+    const { photoOrders } = req.body;
+
+    if (!Array.isArray(photoOrders)) {
+      return res.status(400).json({
+        success: false,
+        message: 'photoOrders must be an array'
+      });
+    }
+
+    await updatePhotoOrder(photoOrders);
+
+    res.json({
+      success: true,
+      message: 'Photo order updated successfully'
+    });
+  } catch (error) {
+    console.error('Error reordering photos:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to reorder photos'
     });
   }
 });

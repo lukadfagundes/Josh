@@ -148,6 +148,40 @@ input[type='file']:hover {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: move;
+  position: relative;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.gallery-admin-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.gallery-admin-item.drag-over {
+  border: 2px dashed var(--primary-emerald);
+  background-color: var(--emerald-pale);
+}
+
+.drag-handle {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: grab;
+  font-size: 1.2rem;
+  color: var(--primary-emerald);
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  user-select: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .gallery-admin-item img {

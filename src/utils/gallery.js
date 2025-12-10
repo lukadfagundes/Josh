@@ -119,9 +119,31 @@ async function deletePhoto(id) {
   }
 }
 
+/**
+ * Updates photo order/positions
+ * @param {Array<{id: number, order: number}>} photoOrders - Array of photo IDs and their new orders
+ * @returns {Promise<void>}
+ */
+async function updatePhotoOrder(photoOrders) {
+  try {
+    // Update all orders sequentially
+    for (const { id, order } of photoOrders) {
+      await sql`
+        UPDATE gallery
+        SET display_order = ${order}
+        WHERE id = ${id}
+      `;
+    }
+  } catch (error) {
+    console.error('Error updating photo order:', error);
+    throw new Error('Failed to update photo order');
+  }
+}
+
 module.exports = {
   readGallery,
   addPhoto,
   updatePhoto,
-  deletePhoto
+  deletePhoto,
+  updatePhotoOrder
 };

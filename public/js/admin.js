@@ -225,7 +225,8 @@ function displayGallery(photos) {
   const html = photos
     .map(
       photo => `
-    <div class="gallery-admin-item">
+    <div class="gallery-admin-item" draggable="true" data-id="${photo.id}">
+      <div class="drag-handle" title="Drag to reorder">☰</div>
       <img src="${photo.photo_url}" alt="${photo.caption}">
       <div class="gallery-admin-info">
         <div class="gallery-admin-caption">${escapeHtml(photo.caption)}</div>
@@ -240,6 +241,7 @@ function displayGallery(photos) {
     .join('');
 
   galleryList.innerHTML = html;
+  initializeDragAndDrop();
 }
 
 // Edit photo
@@ -547,3 +549,107 @@ window.addEventListener('click', e => {
 });
 
 // Note: Memory photo editing removed - visitors crop photos when submitting
+
+// Drag and Drop functionality for gallery reordering
+let draggedElement = null;
+
+function initializeDragAndDrop() {
+  const items = document.querySelectorAll('.gallery-admin-item');
+
+  items.forEach(item => {
+    item.addEventListener('dragstart', handleDragStart);
+    item.addEventListener('dragover', handleDragOver);
+    item.addEventListener('drop', handleDrop);
+    item.addEventListener('dragenter', handleDragEnter);
+    item.addEventListener('dragleave', handleDragLeave);
+    item.addEventListener('dragend', handleDragEnd);
+  });
+}
+
+function handleDragStart(e) {
+  draggedElement = this;
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragOver(e) {
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+  e.dataTransfer.dropEffect = 'move';
+  return false;
+}
+
+function handleDragEnter(e) {
+  if (this !== draggedElement) {
+    this.classList.add('drag-over');
+  }
+}
+
+function handleDragLeave(e) {
+  this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+
+  if (draggedElement !== this) {
+    // Swap elements
+    const allItems = [...galleryList.querySelectorAll('.gallery-admin-item')];
+    const draggedIndex = allItems.indexOf(draggedElement);
+    const targetIndex = allItems.indexOf(this);
+
+    if (draggedIndex < targetIndex) {
+      this.parentNode.insertBefore(draggedElement, this.nextSibling);
+    } else {
+      this.parentNode.insertBefore(draggedElement, this);
+    }
+
+    // Save new order to server
+    savePhotoOrder();
+  }
+
+  this.classList.remove('drag-over');
+  return false;
+}
+
+function handleDragEnd(e) {
+  this.classList.remove('dragging');
+
+  const items = document.querySelectorAll('.gallery-admin-item');
+  items.forEach(item => {
+    item.classList.remove('drag-over');
+  });
+}
+
+async function savePhotoOrder() {
+  const items = [...galleryList.querySelectorAll('.gallery-admin-item')];
+  const photoOrders = items.map((item, index) => ({
+    id: parseInt(item.dataset.id),
+    order: index + 1
+  }));
+
+  try {
+    const response = await fetch(`${API_BASE}/gallery/reorder`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photoOrders }),
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      console.error('Failed to save order:', data.message);
+      // Reload gallery to restore correct order
+      loadGallery();
+    }
+  } catch (error) {
+    console.error('Error saving photo order:', error);
+    // Reload gallery to restore correct order
+    loadGallery();
+  }
+}
