@@ -1,90 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memories</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="css/global.css">
-  <link rel="stylesheet" href="css/responsive.css">
-  <link rel="stylesheet" href="css/pages.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-</head>
-<body>
-  <nav>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="through-years.html">Through the Years</a></li>
-      <li><a href="memories.html" class="active">Memories</a></li>
-      <li><a href="flowers.html">In Lieu of Flowers</a></li>
-    </ul>
-  </nav>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memories</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"
+    />
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="through-years.html">Through the Years</a></li>
+        <li><a href="memories.html" class="active">Memories</a></li>
+        <li><a href="flowers.html">In Lieu of Flowers</a></li>
+      </ul>
+    </nav>
 
-  <div class="container">
-    <h1>Messages from Family and Friends</h1>
+    <div class="container">
+      <h1>Messages from Family and Friends</h1>
 
-    <div id="memoriesList" class="memories-list">
-      <div class="loading">Loading memories...</div>
-    </div>
+      <div id="memoriesList" class="memories-list">
+        <div class="loading">Loading memories...</div>
+      </div>
 
-    <h2 class="text-center mb-2 mt-3">Share Your Memory</h2>
-    <p class="text-center mb-3">Leave a message sharing your favorite memories or just to say something</p>
+      <h2 class="text-center mb-2 mt-3">Share Your Memory</h2>
+      <p class="text-center mb-3">
+        Leave a message sharing your favorite memories or just to say something
+      </p>
 
-    <div class="card memory-form">
-      <form id="memoryForm">
-        <div class="form-group">
-          <label for="from">Your Name</label>
-          <input type="text" id="from" name="from" required placeholder="Enter your name">
-        </div>
-
-        <div class="form-group">
-          <label for="message">Your Message</label>
-          <textarea
-            id="message"
-            name="message"
-            rows="6"
-            required
-            placeholder="Share your favorite memory or leave a message..."
-            maxlength="10000"
-          ></textarea>
-          <div class="char-counter">
-            <span id="charCount">0</span> / 10,000 characters
+      <div class="card memory-form">
+        <form id="memoryForm">
+          <div class="form-group">
+            <label for="from">Your Name</label>
+            <input type="text" id="from" name="from" required placeholder="Enter your name" />
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="photo">Add a Photo (Optional)</label>
-          <input type="file" id="photo" name="photo" accept="image/*">
-          <small style="color: #6b7280; display: block; margin-top: 0.5rem;">Share a photo with your memory (max 10MB)</small>
-        </div>
+          <div class="form-group">
+            <label for="message">Your Message</label>
+            <textarea
+              id="message"
+              name="message"
+              rows="6"
+              required
+              placeholder="Share your favorite memory or leave a message..."
+              maxlength="10000"
+            ></textarea>
+            <div class="char-counter"><span id="charCount">0</span> / 10,000 characters</div>
+          </div>
 
-        <div id="formMessage"></div>
+          <div class="form-group">
+            <label for="photo">Add a Photo (Optional)</label>
+            <input type="file" id="photo" name="photo" accept="image/*" />
+            <small style="color: #6b7280; display: block; margin-top: 0.5rem"
+              >Share a photo with your memory (max 10MB)</small
+            >
+          </div>
 
-        <button type="submit" id="submitBtn">Share Memory</button>
-      </form>
-    </div>
-  </div>
+          <div id="formMessage"></div>
 
-  <!-- Photo Crop Modal -->
-  <div id="cropModal" class="modal">
-    <div class="modal-content" style="max-width: 800px;">
-      <span class="close-crop">&times;</span>
-      <h2>Crop Your Photo</h2>
-      <div class="crop-container">
-        <img id="cropImage" style="max-width: 100%;">
+          <button type="submit" id="submitBtn">Share Memory</button>
+        </form>
       </div>
-      <div style="margin-top: 1rem; text-align: center;">
-        <button type="button" id="cropConfirm" class="btn">Use This Photo</button>
-        <button type="button" class="btn-secondary" id="cancelCrop">Cancel</button>
+    </div>
+
+    <!-- Photo Crop Modal -->
+    <div id="cropModal" class="modal">
+      <div class="modal-content" style="max-width: 800px">
+        <span class="close-crop">&times;</span>
+        <h2>Crop Your Photo</h2>
+        <div class="crop-container">
+          <img id="cropImage" style="max-width: 100%" />
+        </div>
+        <div style="margin-top: 1rem; text-align: center">
+          <button type="button" id="cropConfirm" class="btn">Use This Photo</button>
+          <button type="button" class="btn-secondary" id="cancelCrop">Cancel</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <footer>
-    <p>Forever in our hearts</p>
-  </footer>
+    <footer>
+      <p>Forever in our hearts, it can't rain all the time</p>
+    </footer>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <script src="js/memories.js"></script>
-</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <script src="js/memories.js"></script>
+  </body>
 </html>
