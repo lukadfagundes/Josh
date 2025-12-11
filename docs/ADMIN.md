@@ -65,6 +65,14 @@ The admin link is not visible on any public pages - you must navigate to it dire
 3. Update the caption
 4. Click "Save Changes"
 
+**Reorder Photos:**
+1. Each photo has a drag handle icon (☰) in the top-left corner
+2. Click and hold the drag handle to start dragging
+3. Drag the photo to its new position in the gallery
+4. Visual feedback shows where you can drop the photo (dashed border)
+5. Release to drop - the new order is automatically saved
+6. The public gallery immediately reflects the new order
+
 **Delete Photo:**
 1. Find the photo in the gallery list
 2. Click "Delete"
@@ -119,9 +127,21 @@ The admin link is not visible on any public pages - you must navigate to it dire
 
 ### Rate Limiting
 
-The public memories form has rate limiting (5 submissions per minute per IP).
+**Public Endpoints:**
+- Memory submission: 5 submissions per minute per IP
+- Protects against spam and abuse
 
-Admin panel does NOT have rate limiting - only you should have access.
+**Admin Endpoints:**
+- Admin login: 5 attempts per 15 minutes per IP
+- Prevents brute force attacks
+- After 5 failed attempts, must wait 15 minutes before trying again
+
+**Security Headers:**
+- Content Security Policy (CSP) via Helmet.js
+- X-Frame-Options: DENY
+- X-Content-Type-Options: nosniff
+- Strict-Transport-Security (HSTS)
+- Prevents XSS, clickjacking, and other attacks
 
 ## Important Security Steps Before Deployment
 

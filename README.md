@@ -1,249 +1,290 @@
-# Memorial Website
+# Memorial Website for Joshua Alexander Downs
 
-A beautiful memorial website built with love and care.
+A heartfelt memorial website built to honor and remember Joshua Alexander Downs (October 16, 1994 - December 7, 2025). This project provides a beautiful, interactive space for family and friends to celebrate Josh's life, share memories, and view cherished photographs.
+
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Security](#security)
+- [Deployment](#deployment)
+- [Documentation](#documentation)
+- [License](#license)
 
 ## Features
 
-- Emerald green color scheme
-- Fully responsive (mobile and desktop)
-- Four pages:
-  - Landing page with photo and obituary
-  - Through the Years photo gallery
-  - Interactive Memories guestbook with optional photo uploads
-  - Resources and support information
-- **Admin Panel** for managing content:
-  - Upload and manage gallery photos with cropping
-  - Edit photo captions
-  - Moderate memories (edit text, delete)
-  - View photos submitted with memories
-  - Secure authentication
+### Public Features
+- **Landing Page**: Beautiful hero image with full obituary and life celebration
+- **Photo Gallery**: Chronological photo timeline ("Through the Years") with captions
+- **Memory Wall**: Visitors can share memories and condolences with optional photo attachments
+- **In Lieu of Flowers**: Information about charitable donations and memorial contributions
+- **Responsive Design**: Fully optimized for mobile, tablet, and desktop viewing
+- **Image Cropping**: Built-in cropper for visitors to crop photos before submission
+
+### Admin Features
+- **Secure Authentication**: Session-based authentication with bcrypt password hashing
+- **Photo Gallery Management**:
+  - Upload and crop photos with captions
+  - Edit captions
+  - Delete photos
+  - **Drag-and-drop reordering** with visual feedback
+- **Memory Moderation**:
+  - Edit visitor memories
+  - Delete inappropriate content
+  - View all submissions with timestamps
+- **Rate Limiting**: Automated protection against spam and abuse
+
+### Security Features
+- **Rate Limiting**:
+  - Admin login: 5 attempts per 15 minutes per IP
+  - Memory submission: 5 submissions per minute per IP
+  - In-memory store (upgrade to Redis/PostgreSQL for production scaling)
+- **Content Security Policy**:
+  - Restricts resource loading to trusted sources
+  - Prevents XSS attacks
+  - Configured via Helmet.js
+- **Authentication**:
+  - bcrypt password hashing (10 rounds)
+  - Session-based authentication
+  - PostgreSQL session store for serverless compatibility
+  - Secure cookie configuration
+- **Input Validation**:
+  - Server-side validation for all user inputs
+  - HTML escaping to prevent XSS
+  - File type and size validation
+- **Security Headers**:
+  - X-Frame-Options: DENY
+  - X-Content-Type-Options: nosniff
+  - Strict-Transport-Security (HSTS)
+  - Content-Security-Policy
+
+### Code Quality
+- **Pre-commit Hooks**: Automatic code formatting and linting via Husky
+- **ESLint**: JavaScript best practices enforcement
+- **Prettier**: Consistent code formatting across the project
+- **Lint-staged**: Optimized pre-commit checks on staged files only
+
+## Tech Stack
+
+### Frontend
+- HTML5, CSS3 (Grid & Flexbox), Vanilla JavaScript
+- Cropper.js for image manipulation
+
+### Backend
+- Node.js, Express.js
+- Multer (file uploads), Express Session, Helmet, Express Rate Limit
+
+### Database & Storage
+- Vercel Postgres (Neon) - Serverless PostgreSQL database
+- Vercel Blob - Serverless blob storage for images
+
+### Security & Authentication
+- bcryptjs, connect-pg-simple, Helmet, CORS
+
+### Development Tools
+- ESLint, Prettier, Husky, Lint-staged
 
 ## Getting Started
 
-**NEW USERS: See [docs/SETUP.md](docs/SETUP.md) for step-by-step initial setup!**
+### Prerequisites
+
+- Node.js (v18 or higher)
+- Vercel account (for Postgres and Blob storage)
+- Vercel CLI (`npm i -g vercel`)
 
 ### Installation
 
-Dependencies are already installed. If you need to reinstall:
-
-```bash
-npm install
-```
-
-**Note:** After installing dependencies, pre-commit hooks will be automatically configured via Husky.
-
-### Local Development Setup
-
-This project uses **Vercel Postgres** (Neon) and **Vercel Blob** for persistent storage. To run locally:
-
-1. **Install Vercel CLI** (if not already installed):
+1. **Clone the repository**
    ```bash
-   npm i -g vercel
+   git clone <repository-url>
+   cd Josh
    ```
 
-2. **Link to Vercel project** (one-time setup):
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+   This automatically sets up pre-commit hooks via Husky.
+
+3. **Set up environment variables**
+
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+   Configure the following:
+   ```env
+   POSTGRES_URL="postgres://..."
+   POSTGRES_URL_NON_POOLING="postgres://..."
+   BLOB_READ_WRITE_TOKEN="vercel_blob_..."
+   ADMIN_USERNAME="admin"
+   ADMIN_PASSWORD_HASH="$2a$10$..."
+   SESSION_SECRET="your-secure-random-string"
+   NODE_ENV="development"
+   PORT=3000
+   ```
+
+4. **Link to Vercel project** (for local development)
    ```bash
    vercel link
+   vercel env pull
    ```
 
-3. **Pull environment variables from Vercel**:
-   ```bash
-   vercel env pull .env.local
+5. **Generate admin password hash**
+   ```javascript
+   const bcrypt = require('bcryptjs');
+   const hash = bcrypt.hashSync('your-password', 10);
+   console.log(hash);
    ```
 
-   This downloads ALL environment variables including:
-   - Your admin credentials (ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET)
-   - Postgres connection strings (POSTGRES_URL, etc.)
-   - Blob storage token (BLOB_READ_WRITE_TOKEN)
+### Running Locally
 
-   **Important:** After pulling, change `NODE_ENV="production"` to `NODE_ENV="development"` in `.env.local` for local testing to work properly.
-
-4. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
-
-The website will be available at: http://localhost:3000
-
-**Note:** The `vercel env pull` command will overwrite `.env.local` entirely, so all environment variables should be managed in the Vercel dashboard under Settings > Environment Variables.
-
-For complete setup instructions including production deployment, see [docs/VERCEL_POSTGRES_SETUP.md](docs/VERCEL_POSTGRES_SETUP.md)
-
-## Admin Panel
-
-Access the admin panel at: **http://localhost:3000/admin**
-
-Default credentials:
-- Username: `admin`
-- Password: `changeme123`
-
-**IMPORTANT:** Change these credentials before deploying! See [docs/ADMIN.md](docs/ADMIN.md) for detailed instructions.
-
-### Admin Features:
-- Upload photos to the gallery with image cropping (Cropper.js)
-- Edit photo captions
-- Delete photos
-- Edit visitor memory text (name and message)
-- View photos submitted with memories
-- Delete inappropriate memories (including photos)
-- Secure session-based authentication
-
-Full admin documentation: [docs/ADMIN.md](docs/ADMIN.md)
-
-## Adding Content
-
-### 1. Landing Page Obituary
-
-Edit [public/index.html](public/index.html):
-- Replace `[Full Name]` with his name
-- Replace `[Date of Birth] - [Date of Passing]` with dates
-- Replace placeholder paragraphs with your obituary
-
-### 2. Landing Page Photo
-
-Add his photo to `public/images/landing/` and name it `photo.jpg`
-
-Or update the image path in [public/index.html](public/index.html):
-```html
-<img src="images/landing/your-photo-name.jpg" alt="Memorial photo" class="hero-image">
+**Development mode** (with auto-reload):
+```bash
+npm run dev
 ```
 
-### 3. Photo Gallery
+**Production mode**:
+```bash
+npm start
+```
 
-**Use Admin Panel (Recommended)**
-1. Go to http://localhost:3000/admin
-2. Log in with admin credentials
-3. Click "Photo Gallery" tab
-4. Select a photo and crop it to your liking
-5. Add a caption
-6. Upload - photo automatically appears in the gallery
-
-The gallery is now fully dynamic and loads from `data/gallery.json`. Photos are stored in `public/images/gallery/` with the admin panel handling everything automatically, including image cropping.
-
-### 4. GoFundMe Information
-
-Edit [public/flowers.html](public/flowers.html):
-- Add context about his passing (if you choose to)
-- Add GoFundMe link: Replace `[YOUR_GOFUNDME_LINK]`
-- Add description of what funds will support
-
-## Image Optimization Tips
-
-The admin panel includes a built-in image cropper (Cropper.js) that allows you to crop images before uploading. Additional optimization tips:
-- The cropper allows free aspect ratio cropping
-- Crop to reasonable dimensions for faster loading
-- Use JPEG format for photos (recommended)
-- You can also compress images before uploading (use tools like tinypng.com)
-- Gallery uses lazy loading for optimal performance
-
-## Deploying the Website
-
-This application is designed for **Vercel** deployment with Postgres and Blob storage.
-
-**Prerequisites:**
-1. Vercel account (free tier available)
-2. GitHub repository
-
-**Setup Steps:**
-1. Push code to GitHub
-2. Import project to Vercel
-3. Set up Vercel Postgres (Neon) database
-4. Set up Vercel Blob storage
-5. Configure environment variables
-
-**Complete deployment guide:** See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) and [docs/VERCEL_POSTGRES_SETUP.md](docs/VERCEL_POSTGRES_SETUP.md)
-
-**Why Vercel?**
-- Free tier includes Postgres database and Blob storage
-- Automatic HTTPS and global CDN
-- Serverless functions handle all API routes
-- Data persists across deployments
-- Zero configuration for production
-
-**Environment Variables Required:**
-- `ADMIN_USERNAME` - Your admin username
-- `ADMIN_PASSWORD` - Your admin password
-- `SESSION_SECRET` - Random secret for sessions
-- `NODE_ENV` - Set to `production`
-- `POSTGRES_URL` - Auto-configured by Vercel
-- `BLOB_READ_WRITE_TOKEN` - Auto-configured by Vercel
+Site: `http://localhost:3000`
+Admin: `http://localhost:3000/admin.html`
 
 ## Project Structure
 
 ```
-memorial-website/
-├── public/                 # Frontend files
-│   ├── css/               # Stylesheets
-│   ├── js/                # JavaScript
-│   ├── images/            # Static photos
-│   └── *.html             # Pages
-├── src/                   # Backend
-│   ├── routes/            # API routes
-│   ├── utils/             # Utilities (storage, blob, validation)
-│   ├── db/                # Database connection and initialization
-│   ├── middleware/        # Authentication middleware
-│   ├── config/            # Configuration
-│   └── server.js          # Express server
-├── docs/                  # Documentation
-└── package.json
+Josh/
+├── public/                      # Static frontend files
+│   ├── css/
+│   │   ├── global.css          # Global styles and variables
+│   │   ├── responsive.css      # Mobile-first responsive styles
+│   │   ├── pages.css           # Page-specific styles
+│   │   └── admin.css           # Admin panel styles
+│   ├── js/
+│   │   ├── gallery.js          # Public gallery functionality
+│   │   ├── memories.js         # Memory submission with cropping
+│   │   └── admin.js            # Admin panel with drag-and-drop
+│   ├── images/                 # Static images
+│   ├── index.html              # Landing page
+│   ├── through-years.html      # Photo gallery
+│   ├── memories.html           # Memory submission
+│   ├── flowers.html            # Donation information
+│   └── admin.html              # Admin panel
+│
+├── src/                        # Backend source code
+│   ├── config/
+│   │   ├── admin.js            # Admin credentials
+│   │   └── rateLimits.js       # Rate limiting configuration
+│   ├── db/
+│   │   └── index.js            # Database connection
+│   ├── middleware/
+│   │   └── auth.js             # Authentication middleware
+│   ├── routes/
+│   │   ├── admin.js            # Admin API endpoints
+│   │   ├── gallery.js          # Public gallery endpoints
+│   │   └── memories.js         # Memory submission endpoints
+│   ├── utils/
+│   │   ├── blob.js             # Vercel Blob utilities
+│   │   ├── gallery.js          # Gallery database operations
+│   │   ├── storage.js          # Memory database operations
+│   │   └── validator.js        # Input validation
+│   └── server.js               # Express server entry point
+│
+├── docs/                       # Documentation
+│   ├── QUICK_START.md
+│   ├── SETUP.md
+│   ├── ADMIN.md
+│   ├── DEPLOYMENT.md
+│   ├── PRE_COMMIT_SETUP.md
+│   └── VERCEL_POSTGRES_SETUP.md
+│
+├── .husky/                     # Git hooks
+├── LICENSE                     # MIT License
+└── README.md                   # This file
 ```
 
-## Notes
+## Security
 
-- **Data Storage**: Memories and gallery metadata stored in Vercel Postgres (Neon)
-- **Photo Storage**: All photos stored in Vercel Blob storage
-- **Session Storage**: Admin sessions stored in PostgreSQL for serverless persistence
-- Memory form has a 10,000 character limit
-- Photo uploads limited to 10MB
-- Visitors can optionally attach photos and crop them before submitting
-- Visitors crop their own photos - admins cannot edit memory photos
-- Rate limiting: 5 submissions per minute per IP
-- User input is validated and escaped on the frontend to prevent XSS
-- Admin panel uses session-based authentication with bcrypt password hashing
-- All images support lazy loading for better performance
-- **Data persists** across deployments and serverless function instances
+### Security Audit Summary
 
-## Code Quality & Pre-Commit Hooks
+**Overall Rating**: A- (Excellent)
 
-This project uses **pre-commit hooks** to ensure code quality before commits:
+**Implemented Security Measures**:
+1. Rate limiting on admin login and public submissions
+2. Comprehensive Content Security Policy via Helmet.js
+3. Session-based authentication with bcrypt
+4. PostgreSQL session store (serverless-compatible)
+5. Input validation and XSS protection
+6. Security headers (HSTS, X-Frame-Options, etc.)
+7. File upload validation (type & size)
 
-- **Prettier**: Automatically formats code for consistent styling
-- **ESLint**: Catches JavaScript errors and enforces best practices
-- **Husky**: Manages git hooks
-- **lint-staged**: Runs checks only on staged files
+**Critical Issues**: None
+**High Priority**: None
+**Medium Priority**: None
+**Low Priority**: Consider 2FA for enterprise deployments
 
-### How It Works
+For details, see [SECURITY_AUDIT.md](SECURITY_AUDIT.md)
 
-When you run `git commit`, the pre-commit hook will automatically:
-1. Run ESLint on staged JavaScript files and auto-fix issues
-2. Run Prettier on staged files (JS, JSON, CSS, HTML) and format them
-3. Stage the formatted/fixed files
-4. Proceed with commit if all checks pass
+## Deployment
 
-### Available Scripts
+### Vercel Deployment (Recommended)
+
+1. Push to GitHub
+2. Deploy to Vercel: `vercel --prod`
+3. Configure environment variables in Vercel dashboard
+4. Set up custom domain (optional)
+
+Full guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+### Manual Deployment
+
+Can be deployed to any Node.js host with PostgreSQL and blob storage support.
+
+## Documentation
+
+- [Quick Start Guide](docs/QUICK_START.md)
+- [Setup Guide](docs/SETUP.md)
+- [Admin Panel Guide](docs/ADMIN.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Pre-commit Hooks](docs/PRE_COMMIT_SETUP.md)
+- [Database Setup](docs/VERCEL_POSTGRES_SETUP.md)
+
+## Available Scripts
 
 ```bash
-npm run format         # Format all files
-npm run format:check   # Check formatting without changes
-npm run lint           # Run linter
-npm run lint:fix       # Run linter and auto-fix issues
+npm start              # Production server
+npm run dev            # Development server with auto-reload
+npm run format         # Format all files with Prettier
+npm run format:check   # Check formatting
+npm run lint           # Run ESLint
+npm run lint:fix       # ESLint with auto-fix
 ```
 
-**For complete pre-commit documentation:** See [PRE_COMMIT_SETUP.md](PRE_COMMIT_SETUP.md)
+## Contributing
 
-## Making Changes
+This is a personal memorial project. Feel free to fork under the MIT license for your own use.
 
-Feel free to customize:
-- Colors in `public/css/global.css` (search for `:root` variables)
-- Layout and spacing throughout the CSS files
-- Add more pages or sections as needed
+## License
 
-**Note:** Your changes will be automatically formatted when you commit thanks to pre-commit hooks!
-
-## Support
-
-If you need help with any changes or deployment, feel free to reach out.
+MIT License - see [LICENSE](LICENSE) file.
 
 ---
 
-Built with care in memory of a great human.
+## Acknowledgments
+
+Built with love in memory of Joshua Alexander Downs.
+
+*"If the people we love are stolen from us, the way to have them live on is to never stop loving them."* - The Crow
+
+---
+
+**Version**: 1.0.0
+**Last Updated**: December 2025
+**Node.js**: v18+
+**Database**: Vercel Postgres (Neon)
+**Storage**: Vercel Blob
